@@ -237,20 +237,19 @@ header p {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-#pogemon-reveal-container h2 {
-    font-family: 'Press Start 2P', cursive;
+    background: transparent;
+    z-index: 5;
 }
 
 /* Card Flip Animation & Structure */
 .card-container {
-    perspective: 1000px;
+    perspective: 1200px;
     width: 320px;
     height: 440px;
     margin: 10px auto;
     position: relative;
     z-index: 10;
+    background: transparent;
 }
 
 .card {
@@ -258,6 +257,7 @@ header p {
     height: 100%;
     position: relative;
     transform-style: preserve-3d;
+    background: transparent;
 }
 
 .card-inner {
@@ -265,8 +265,9 @@ header p {
     height: 100%;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: pointer;
+    transform-origin: center center;
 }
 
 .card-inner.is-flipped {
@@ -281,7 +282,9 @@ header p {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    overflow: hidden;
+    transform: translateZ(0);
 }
 
 .card-front {
@@ -290,6 +293,7 @@ header p {
     justify-content: center;
     align-items: center;
     color: white;
+    z-index: 2;
 }
 
 .card-back {
@@ -300,6 +304,7 @@ header p {
     flex-direction: column;
     padding: 15px;
     transform: rotateY(180deg);
+    z-index: 1;
 }
 
 .card-back-design {
