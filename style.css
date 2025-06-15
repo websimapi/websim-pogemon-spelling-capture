@@ -60,11 +60,15 @@ header p {
 }
 
 #game-area {
+    margin: 20px 0;
+}
+
+#game-controls-wrapper {
     background-color: var(--card-bg);
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    margin: 20px 0;
+    margin-bottom: 20px;
 }
 
 #word-controls {
@@ -245,6 +249,8 @@ header p {
     width: 320px;
     height: 440px;
     margin: 10px auto;
+    position: relative;
+    z-index: 10;
 }
 
 .card {
