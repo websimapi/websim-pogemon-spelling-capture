@@ -1,10 +1,35 @@
 import confetti from 'canvas-confetti';
 
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const soundCache = {};
+
+async function playSound(url) {
+    try {
+        let buffer;
+        if (soundCache[url]) {
+            buffer = soundCache[url];
+        } else {
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            buffer = await audioContext.decodeAudioData(arrayBuffer);
+            soundCache[url] = buffer;
+        }
+        
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioContext.destination);
+        source.start(0);
+    } catch (error) {
+        console.error(`Error playing sound ${url}:`, error);
+    }
+}
+
 const game = {
     // DOM Elements
     difficultySelection: document.getElementById('difficulty-selection'),
     gameArea: document.getElementById('game-area'),
     speakWordBtn: document.getElementById('speak-word-btn'),
+    useInSentenceBtn: document.getElementById('use-in-sentence-btn'),
     spellingDisplay: document.getElementById('spelling-display'),
     hintDisplay: document.getElementById('hint-display'),
     micBtn: document.getElementById('mic-btn'),
@@ -48,6 +73,9 @@ const game = {
     addEventListeners() {
         this.difficultySelection.addEventListener('click', async (e) => {
             if (e.target.tagName === 'BUTTON') {
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
                 this.difficulty = e.target.dataset.level;
                 this.difficultySelection.classList.add('hidden');
                 this.gameArea.classList.remove('hidden');
@@ -63,6 +91,7 @@ const game = {
         });
 
         this.speakWordBtn.addEventListener('click', () => this.speak(this.currentWord));
+        this.useInSentenceBtn.addEventListener('click', () => this.getAndSpeakSentence());
         this.nextWordBtn.addEventListener('click', () => this.startNewRound());
         this.micBtn.addEventListener('click', () => this.toggleMic());
     },
@@ -284,6 +313,8 @@ const game = {
         this.hintDisplay.innerHTML = '';
         this.spellingDisplay.innerHTML = '';
         this.pogemonImageContainer.innerHTML = '<div class="loader"></div>';
+        this.useInSentenceBtn.disabled = false;
+        this.useInSentenceBtn.querySelector('span').textContent = 'Use in Sentence';
     },
 
     speak(text) {
@@ -377,6 +408,43 @@ const game = {
         this.spellingDisplay.querySelector('input')?.focus();
     },
 
+    async getAndSpeakSentence() {
+        if (!this.currentWord) return;
+
+        this.useInSentenceBtn.disabled = true;
+        this.useInSentenceBtn.querySelector('span').textContent = 'Thinking...';
+
+        try {
+            const completion = await websim.chat.completions.create({
+                messages: [
+                    {
+                        role: 'system',
+                        content: `You generate simple sentences for a spelling game. Respond directly with JSON, following this JSON schema, and no other text: { "sentence": "string" }`
+                    },
+                    {
+                        role: 'user',
+                        content: `Create a simple, age-appropriate sentence for a ${this.difficulty} level speller using the word "${this.currentWord}".`
+                    }
+                ],
+                json: true,
+            });
+
+            const result = JSON.parse(completion.content);
+            if (result.sentence) {
+                playSound('./sentence-ready.mp3');
+                this.speak(result.sentence);
+            } else {
+                this.setMessage('Could not generate a sentence.', 'incorrect');
+            }
+        } catch (error) {
+            console.error('Error fetching sentence:', error);
+            this.setMessage('Could not get a sentence. Please try again.', 'incorrect');
+        } finally {
+            this.useInSentenceBtn.disabled = false;
+            this.useInSentenceBtn.querySelector('span').textContent = 'Use in Sentence';
+        }
+    },
+
     checkSpelling() {
         if(this.isChecking) return;
         this.isChecking = true;
@@ -392,6 +460,7 @@ const game = {
     },
 
     async handleCorrectSpelling() {
+        playSound('./correct.mp3');
         this.setMessage('Correct!', 'correct');
         this.spellingDisplay.querySelectorAll('input').forEach(input => input.disabled = true);
         this.nextWordBtn.classList.add('hidden'); // Ensure button is hidden until reveal
@@ -437,6 +506,7 @@ const game = {
     },
 
     handleIncorrectSpelling() {
+        playSound('./incorrect.mp3');
         this.setMessage('Try again!', 'incorrect');
         this.wrongAttempts++;
         

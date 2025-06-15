@@ -72,6 +72,9 @@ header p {
 }
 
 #word-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
     margin-bottom: 20px;
 }
 
@@ -89,9 +92,14 @@ header p {
     transition: all 0.3s;
 }
 
-#word-controls button:hover {
+#word-controls button:hover:not(:disabled) {
     background-color: var(--primary-color);
     color: white;
+}
+
+#word-controls button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 #spelling-area {
