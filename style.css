@@ -94,12 +94,19 @@ header p {
     margin-bottom: 20px;
 }
 
+.spelling-input-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
 #spelling-display {
     display: flex;
     justify-content: center;
     gap: 10px;
     min-height: 60px;
-    margin-bottom: 10px;
     flex-wrap: wrap;
 }
 
@@ -114,6 +121,29 @@ header p {
     font-size: 2rem;
     font-weight: bold;
     text-transform: uppercase;
+}
+
+#spelling-display input {
+    width: 50px;
+    height: 50px;
+    border: 2px solid var(--text-color);
+    border-radius: 5px;
+    font-size: 2rem;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 0;
+    background-color: transparent;
+    color: var(--text-color);
+    box-sizing: border-box;
+    caret-color: var(--primary-color);
+}
+
+#spelling-display input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px var(--primary-color);
 }
 
 #hint-display {
@@ -157,7 +187,7 @@ header p {
 }
 
 #mic-btn {
-    padding: 10px;
+    padding: 10px 15px;
     background-color: var(--secondary-color);
     color: white;
     border: none;
@@ -167,6 +197,7 @@ header p {
     align-items: center;
     gap: 5px;
     transition: background-color 0.3s;
+    height: 54px; /* Align with new input boxes */
 }
 
 #mic-btn:hover {

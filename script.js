@@ -7,7 +7,6 @@ const game = {
     speakWordBtn: document.getElementById('speak-word-btn'),
     spellingDisplay: document.getElementById('spelling-display'),
     hintDisplay: document.getElementById('hint-display'),
-    letterInput: document.getElementById('letter-input'),
     micBtn: document.getElementById('mic-btn'),
     micStatus: document.getElementById('mic-status'),
     gameMessage: document.getElementById('game-message'),
@@ -296,8 +295,8 @@ const game = {
         this.letterInput.disabled = false;
         this.letterInput.focus();
         this.hintDisplay.innerHTML = '';
+        this.spellingDisplay.innerHTML = '';
         this.pogemonImageContainer.innerHTML = '<div class="loader"></div>';
-        this.updateSpellingDisplay();
     },
 
     speak(text) {
@@ -318,34 +317,94 @@ const game = {
         setTimeout(() => e.target.value = '', 0);
     },
     
-    addLetter(letter) {
-        if (this.userSpelling.length < this.currentWord.length) {
-            this.userSpelling.push(letter);
-            this.updateSpellingDisplay();
+    handleSpellingInput(e) {
+        const input = e.target;
+        const value = input.value;
 
-            if (this.userSpelling.length === this.currentWord.length) {
+        // If user enters a valid letter, move to next box
+        if (value.match(/^[a-z]$/i)) {
+            const index = parseInt(input.dataset.index, 10);
+            const nextInput = this.spellingDisplay.querySelector(`input[data-index="${index + 1}"]`);
+            if (nextInput) {
+                nextInput.focus();
+            } else {
+                // This was the last box, check spelling
                 this.checkSpelling();
             }
+        } else if (value) {
+            input.value = ''; // Clear invalid input
+        }
+    },
+
+    handleSpellingKeyDown(e) {
+        const input = e.target;
+        const index = parseInt(input.dataset.index, 10);
+
+        if (e.key === 'Backspace' && input.value === '') {
+            e.preventDefault();
+            const prevInput = this.spellingDisplay.querySelector(`input[data-index="${index - 1}"]`);
+            if (prevInput) {
+                prevInput.focus();
+            }
+        } else if (e.key === 'ArrowLeft') {
+            const prevInput = this.spellingDisplay.querySelector(`input[data-index="${index - 1}"]`);
+            if (prevInput) prevInput.focus();
+        } else if (e.key === 'ArrowRight') {
+            const nextInput = this.spellingDisplay.querySelector(`input[data-index="${index + 1}"]`);
+            if (nextInput) nextInput.focus();
+        }
+    },
+    
+    handleSpellingPaste(e) {
+        e.preventDefault();
+        const pasteData = e.clipboardData.getData('text').toLowerCase().replace(/[^a-z]/g, '');
+        const inputs = this.spellingDisplay.querySelectorAll('input');
+        
+        for (let i = 0; i < pasteData.length; i++) {
+            if (inputs[i]) {
+                inputs[i].value = pasteData[i];
+            }
+        }
+        this.checkSpelling();
+    },
+    
+    addLetter(letter) {
+        const inputs = this.spellingDisplay.querySelectorAll('input');
+        const targetInput = Array.from(inputs).find(input => !input.value);
+
+        if (targetInput) {
+            targetInput.value = letter;
+            targetInput.dispatchEvent(new Event('input', { bubbles: true }));
         }
     },
 
     updateSpellingDisplay() {
         this.spellingDisplay.innerHTML = '';
-        const len = this.currentWord.length || this.userSpelling.length || 0;
+        const len = this.currentWord.length || 0;
+        if (len === 0) return;
+
         for (let i = 0; i < len; i++) {
-            const letter = this.userSpelling[i] || '';
-            const box = document.createElement('div');
-            box.className = 'letter-box';
-            box.textContent = letter;
-            this.spellingDisplay.appendChild(box);
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.maxLength = 1;
+            input.dataset.index = i;
+            input.autocomplete = 'off';
+            input.autocapitalize = 'off';
+            input.addEventListener('input', (e) => this.handleSpellingInput(e));
+            input.addEventListener('keydown', (e) => this.handleSpellingKeyDown(e));
+            input.addEventListener('paste', (e) => this.handleSpellingPaste(e));
+            this.spellingDisplay.appendChild(input);
         }
+        this.spellingDisplay.querySelector('input')?.focus();
     },
 
     checkSpelling() {
         if(this.isChecking) return;
         this.isChecking = true;
 
-        const spelledWord = this.userSpelling.join('');
+        const inputs = this.spellingDisplay.querySelectorAll('input');
+        const spelledWord = Array.from(inputs).map(input => input.value).join('').toLowerCase();
+
         if (spelledWord === this.currentWord) {
             this.handleCorrectSpelling();
         } else {
@@ -355,7 +414,7 @@ const game = {
 
     async handleCorrectSpelling() {
         this.setMessage('Correct!', 'correct');
-        this.letterInput.disabled = true;
+        this.spellingDisplay.querySelectorAll('input').forEach(input => input.disabled = true);
         this.nextWordBtn.classList.add('hidden'); // Ensure button is hidden until flip
 
         this.pogemonRevealContainer.classList.remove('hidden');
@@ -415,10 +474,10 @@ const game = {
         ], { duration: 300, iterations: 1 });
 
         setTimeout(() => {
-            this.userSpelling = [];
-            this.updateSpellingDisplay();
+            const inputs = this.spellingDisplay.querySelectorAll('input');
+            inputs.forEach(input => input.value = '');
             this.setMessage('');
-            this.letterInput.focus();
+            inputs[0]?.focus();
             this.isChecking = false;
         }, 1000);
 
@@ -541,7 +600,6 @@ const game = {
 
             if (/[a-z]/.test(lastChar)) {
                  this.addLetter(lastChar);
-                 this.letterInput.value = '';
             } else {
                 this.setMessage('Please say a single letter.', 'incorrect');
                 setTimeout(() => this.setMessage(''), 1500);
@@ -572,7 +630,8 @@ const game = {
         if (this.micBtn.classList.contains('recording')) {
             this.speechRecognition.stop();
         } else {
-            if (this.letterInput.disabled) return;
+            const firstInput = this.spellingDisplay.querySelector('input');
+            if (firstInput && firstInput.disabled) return;
             try {
                 this.speechRecognition.start();
             } catch(e) {
