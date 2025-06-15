@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pogemon Spelling Capture</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Pogemon Spelling Capture</h1>
+            <p>Spell the word to capture a unique Pogemon!</p>
+        </header>
+
+        <div id="difficulty-selection">
+            <h2>Choose your level:</h2>
+            <button data-level="1st Grade">Grade 1</button>
+            <button data-level="3rd Grade">Grade 3</button>
+            <button data-level="5th Grade">Grade 5</button>
+            <button data-level="8th Grade">Grade 8</button>
+            <button data-level="High School">High School</button>
+            <button data-level="College">College</button>
+        </div>
+
+        <div id="game-area" class="hidden">
+            <div id="word-controls">
+                <button id="speak-word-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    <span>Hear Word Again</span>
+                </button>
+            </div>
+            
+            <div id="spelling-area">
+                <div id="spelling-display"></div>
+                <div id="hint-display"></div>
+            </div>
+
+            <div id="input-area">
+                 <p>Type or speak one letter at a time.</p>
+                <div class="input-controls">
+                    <input type="text" id="letter-input" maxlength="1" placeholder="Type a letter..." autocomplete="off" autocapitalize="off">
+                    <button id="mic-btn">
+                        <svg id="mic-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                        <span id="mic-status">Use Mic</span>
+                    </button>
+                </div>
+            </div>
+
+            <p id="game-message"></p>
+
+            <div id="pogemon-reveal" class="hidden">
+                <h2>You captured a Pogemon!</h2>
+                <div id="pogemon-card">
+                    <div id="pogemon-image-container">
+                         <div class="loader"></div>
+                    </div>
+                    <h3 id="pogemon-name"></h3>
+                    <p id="pogemon-description"></p>
+                </div>
+                <button id="next-word-btn">Next Word</button>
+            </div>
+        </div>
+
+        <div id="pogemon-gallery">
+            <h2>Your Pogemon Collection</h2>
+            <div id="gallery-grid">
+                <p>Capture your first Pogemon to start your collection!</p>
+            </div>
+        </div>
+    </div>
+    <script type="importmap">
+    {
+      "imports": {
+        "canvas-confetti": "https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.module.mjs"
+      }
+    }
+    </script>
+    <script src="script.js" type="module"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
+

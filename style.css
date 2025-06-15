@@ -1,0 +1,356 @@
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #f5a623;
+    --background-color: #f0f4f8;
+    --text-color: #333;
+    --card-bg: #ffffff;
+    --correct-color: #7ed321;
+    --wrong-color: #d0021b;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+#game-container {
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+}
+
+header h1 {
+    font-family: 'Press Start 2P', cursive;
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+header p {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+    margin-top: 0;
+}
+
+#difficulty-selection button {
+    font-family: 'Press Start 2P', cursive;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+#difficulty-selection button:hover {
+    background-color: #357abd;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#game-area {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+#word-controls {
+    margin-bottom: 20px;
+}
+
+#word-controls button {
+    background: none;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+}
+
+#word-controls button:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+#spelling-area {
+    margin-bottom: 20px;
+}
+
+#spelling-display {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    min-height: 60px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.letter-box {
+    width: 50px;
+    height: 50px;
+    border: 2px solid var(--text-color);
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+#hint-display {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    min-height: 55px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+#hint-display .letter-box {
+     border-style: dashed;
+     color: #aaa;
+     background-color: #f9f9f9;
+}
+
+
+#input-area {
+    margin-bottom: 20px;
+}
+#input-area p {
+    margin: 0 0 10px 0;
+    color: #666;
+}
+
+.input-controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#letter-input {
+    width: 150px;
+    padding: 10px;
+    font-size: 1.2rem;
+    text-align: center;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    text-transform: uppercase;
+}
+
+#mic-btn {
+    padding: 10px;
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.3s;
+}
+
+#mic-btn:hover {
+    background-color: #e59400;
+}
+
+#mic-btn.recording {
+    background-color: var(--wrong-color);
+}
+#mic-btn.recording #mic-icon {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+
+#game-message {
+    min-height: 24px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+#game-message.correct { color: var(--correct-color); }
+#game-message.incorrect { color: var(--wrong-color); }
+#game-message.loading { color: var(--primary-color); }
+
+
+#pogemon-reveal {
+    margin-top: 20px;
+}
+
+#pogemon-card {
+    background-color: var(--background-color);
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px auto;
+    max-width: 400px;
+}
+
+#pogemon-image-container {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#pogemon-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+#pogemon-name {
+    margin: 0 0 10px 0;
+    font-family: 'Press Start 2P', cursive;
+    color: var(--primary-color);
+    text-transform: capitalize;
+}
+
+#pogemon-description {
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+#next-word-btn {
+    font-family: 'Press Start 2P', cursive;
+    background-color: var(--correct-color);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    transition: background-color 0.3s;
+}
+
+#next-word-btn:hover {
+    background-color: #68b31a;
+}
+
+
+#pogemon-gallery {
+    margin-top: 40px;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+#pogemon-gallery h2 {
+    font-family: 'Press Start 2P', cursive;
+}
+
+#gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.gallery-item {
+    aspect-ratio: 1 / 1;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.1);
+}
+
+.gallery-item .tooltip {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 110%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.gallery-item .tooltip strong {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+    display: block;
+    margin-bottom: 5px;
+    text-transform: capitalize;
+}
+
+.gallery-item .tooltip p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.gallery-item .tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+.gallery-item:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+.loader {
+    border: 8px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 8px solid var(--primary-color);
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
