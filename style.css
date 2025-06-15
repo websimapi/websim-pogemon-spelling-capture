@@ -280,21 +280,21 @@ header p {
 }
 
 .card-front {
+    background-color: var(--primary-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.card-back {
     background-color: var(--card-bg);
     border: 8px solid var(--primary-color);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     padding: 15px;
-}
-
-.card-back {
-    background-color: var(--primary-color);
     transform: rotateY(180deg);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
 }
 
 .card-back-design {
