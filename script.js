@@ -285,9 +285,6 @@ const game = {
         this.currentWordObject = null;
         this.crossGradeLevel = null;
         this.revealedIndices.clear();
-        this.letterInput.value = '';
-        this.letterInput.disabled = false;
-        this.letterInput.focus();
         this.hintDisplay.innerHTML = '';
         this.spellingDisplay.innerHTML = '';
         this.pogemonImageContainer.innerHTML = '<div class="loader"></div>';
@@ -301,14 +298,6 @@ const game = {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         window.speechSynthesis.speak(utterance);
-    },
-    
-    handleTextInput(e) {
-        const letter = e.target.value.toLowerCase();
-        if (letter && /^[a-z]$/.test(letter) && this.userSpelling.length < this.currentWord.length) {
-            this.addLetter(letter);
-        }
-        setTimeout(() => e.target.value = '', 0);
     },
     
     handleSpellingInput(e) {
