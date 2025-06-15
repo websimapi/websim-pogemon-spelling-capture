@@ -276,6 +276,7 @@ const game = {
         if (cardInner) {
             cardInner.classList.remove('is-flipped');
         }
+        this.pogemonCard.classList.remove('is-popping'); // Ensure pop animation class is removed
         
         this.gameArea.classList.remove('hidden');
         this.userSpelling = [];
@@ -408,8 +409,15 @@ const game = {
         // Add a one-time listener to flip the card on click
         this.pogemonCard.addEventListener('click', () => {
             if (cardInner.classList.contains('is-flipped')) return;
+
+            this.pogemonCard.classList.add('is-popping'); // Add class to trigger pop animation
             cardInner.classList.add('is-flipped');
             this.nextWordBtn.classList.remove('hidden');
+
+            // Clean up the animation class after it finishes
+            this.pogemonCard.addEventListener('animationend', () => {
+                this.pogemonCard.classList.remove('is-popping');
+            }, { once: true });
         }, { once: true });
 
         // Update stats for 1st/2nd grade level while image generates

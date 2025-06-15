@@ -237,19 +237,20 @@ header p {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background: transparent;
-    z-index: 5;
+}
+
+#pogemon-reveal-container h2 {
+    font-family: 'Press Start 2P', cursive;
 }
 
 /* Card Flip Animation & Structure */
 .card-container {
-    perspective: 1200px;
+    perspective: 1500px; /* Enhanced 3D effect */
     width: 320px;
     height: 440px;
     margin: 10px auto;
     position: relative;
     z-index: 10;
-    background: transparent;
 }
 
 .card {
@@ -257,7 +258,11 @@ header p {
     height: 100%;
     position: relative;
     transform-style: preserve-3d;
-    background: transparent;
+}
+
+/* New animation class for the card pop effect */
+.card.is-popping {
+    animation: pop-out-animation 1.2s ease-in-out;
 }
 
 .card-inner {
@@ -265,9 +270,8 @@ header p {
     height: 100%;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 1.2s ease-in-out; /* Match pop animation for a synced effect */
     cursor: pointer;
-    transform-origin: center center;
 }
 
 .card-inner.is-flipped {
@@ -282,9 +286,14 @@ header p {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     overflow: hidden;
-    transform: translateZ(0);
+}
+
+/* Animate shadow on the card faces when the parent card is popping */
+.card.is-popping .card-front,
+.card.is-popping .card-back {
+    animation: shadow-pop-animation 1.2s ease-in-out;
 }
 
 .card-front {
@@ -293,7 +302,6 @@ header p {
     justify-content: center;
     align-items: center;
     color: white;
-    z-index: 2;
 }
 
 .card-back {
@@ -304,7 +312,6 @@ header p {
     flex-direction: column;
     padding: 15px;
     transform: rotateY(180deg);
-    z-index: 1;
 }
 
 .card-back-design {
@@ -561,6 +568,32 @@ header p {
     visibility: visible;
     opacity: 1;
 }
+
+/* --- New Animations for Card Flip --- */
+@keyframes pop-out-animation {
+    0% {
+        transform: translateZ(0px) scale(1);
+    }
+    50% {
+        transform: translateZ(80px) scale(1.05);
+    }
+    100% {
+        transform: translateZ(0px) scale(1);
+    }
+}
+
+@keyframes shadow-pop-animation {
+    0% {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    50% {
+        box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+    }
+    100% {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+}
+
 
 .loader {
     border: 8px solid #f3f3f3;
