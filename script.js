@@ -408,7 +408,7 @@ const game = {
         // Add a one-time listener to flip the card on click
         this.pogemonCard.addEventListener('click', () => {
             if (cardInner.classList.contains('is-flipped')) return;
-            this.animateCardFlip(cardInner);
+            cardInner.classList.add('is-flipped');
             this.nextWordBtn.classList.remove('hidden');
         }, { once: true });
 
