@@ -408,8 +408,7 @@ const game = {
         // Add a one-time listener to flip the card on click
         this.pogemonCard.addEventListener('click', () => {
             if (cardInner.classList.contains('is-flipped')) return;
-            cardInner.classList.add('is-flipped');
-            this.nextWordBtn.classList.remove('hidden');
+            this.flipCard(cardInner);
         }, { once: true });
 
         // Update stats for 1st/2nd grade level while image generates
@@ -653,6 +652,15 @@ const game = {
         };
         
         requestAnimationFrame(frame);
+    },
+
+    flipCard(cardInner) {
+        cardInner.classList.add('is-flipped');
+        
+        // Show the next word button after flip animation completes
+        setTimeout(() => {
+            this.nextWordBtn.classList.remove('hidden');
+        }, 600);
     }
 };
 
