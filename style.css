@@ -245,7 +245,7 @@ header p {
 
 /* Card Flip Animation & Structure */
 .card-container {
-    perspective: 1500px; /* Enhanced 3D effect */
+    perspective: 1000px;
     width: 320px;
     height: 440px;
     margin: 10px auto;
@@ -260,17 +260,12 @@ header p {
     transform-style: preserve-3d;
 }
 
-/* New animation class for the card pop effect */
-.card.is-popping {
-    animation: pop-out-animation 1.2s ease-in-out;
-}
-
 .card-inner {
     width: 100%;
     height: 100%;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 1.2s ease-in-out; /* Match pop animation for a synced effect */
+    transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
     cursor: pointer;
 }
 
@@ -288,12 +283,6 @@ header p {
     border-radius: 15px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     overflow: hidden;
-}
-
-/* Animate shadow on the card faces when the parent card is popping */
-.card.is-popping .card-front,
-.card.is-popping .card-back {
-    animation: shadow-pop-animation 1.2s ease-in-out;
 }
 
 .card-front {
@@ -568,32 +557,6 @@ header p {
     visibility: visible;
     opacity: 1;
 }
-
-/* --- New Animations for Card Flip --- */
-@keyframes pop-out-animation {
-    0% {
-        transform: translateZ(0px) scale(1);
-    }
-    50% {
-        transform: translateZ(80px) scale(1.05);
-    }
-    100% {
-        transform: translateZ(0px) scale(1);
-    }
-}
-
-@keyframes shadow-pop-animation {
-    0% {
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    50% {
-        box-shadow: 0 30px 60px rgba(0,0,0,0.3);
-    }
-    100% {
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-}
-
 
 .loader {
     border: 8px solid #f3f3f3;
