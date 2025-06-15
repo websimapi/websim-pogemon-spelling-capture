@@ -22,12 +22,16 @@ const game = {
     difficulty: '3rd Grade',
     currentWord: '',
     currentDescription: '',
+    currentWordObject: null, // For 1st grade word data
     userSpelling: [],
     wrongAttempts: 0,
     hintsGiven: 0,
     revealedIndices: new Set(),
     collectedPogemon: [],
     pogemonCollectionKey: 'pogemon-collection',
+    wordStats: {},
+    wordStatsKey: 'pogemon-word-stats',
+    wordsForCurrentCycle: [],
     speechRecognition: null,
     isChecking: false,
 
@@ -35,15 +39,21 @@ const game = {
         this.addEventListeners();
         this.setupSpeechRecognition();
         this.loadCollectionFromStorage();
+        this.loadWordStats();
     },
 
     addEventListeners() {
-        this.difficultySelection.addEventListener('click', (e) => {
+        this.difficultySelection.addEventListener('click', async (e) => {
             if (e.target.tagName === 'BUTTON') {
                 this.difficulty = e.target.dataset.level;
                 this.difficultySelection.classList.add('hidden');
                 this.gameArea.classList.remove('hidden');
-                this.startNewRound();
+                
+                if (this.difficulty === '1st Grade') {
+                    await this.setupFirstGradeLevel();
+                }
+                
+                await this.startNewRound();
             }
         });
 
@@ -58,8 +68,99 @@ const game = {
         this.micBtn.addEventListener('click', () => this.toggleMic());
     },
 
+    async setupFirstGradeLevel() {
+        this.setMessage('Loading 1st grade words...', 'loading');
+        try {
+            const response = await fetch('./1st_grade_words.json');
+            if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+            const wordList = await response.json();
+
+            // Initialize stats if not present for this level
+            if (!this.wordStats['1st Grade']) {
+                this.wordStats['1st Grade'] = {};
+                wordList.forEach(wordObj => {
+                    this.wordStats['1st Grade'][wordObj.word] = {
+                        totalIncorrect: 0,
+                        seenInInitialCycle: false,
+                        ...wordObj
+                    };
+                });
+                this.saveWordStats();
+            }
+            
+            this.prepareWordCycle();
+
+        } catch (error) {
+            console.error('Failed to load 1st grade words:', error);
+            this.setMessage('Could not load words. Reverting to default.', 'incorrect');
+            this.difficulty = '3rd Grade'; // Revert to a working mode that uses the LLM
+        }
+    },
+
+    prepareWordCycle() {
+        const gradeStats = this.wordStats['1st Grade'];
+        if (!gradeStats) return;
+        const allWords = Object.values(gradeStats);
+
+        // Phase 1: Show all words that haven't been seen in the initial cycle
+        const unseenInitialWords = allWords.filter(word => !word.seenInInitialCycle);
+        if (unseenInitialWords.length > 0) {
+            this.wordsForCurrentCycle = this.shuffle(unseenInitialWords);
+            return;
+        }
+
+        // Phase 2: All words seen at least once, now sort by score
+        const sortedWords = [...allWords].sort((a, b) => b.totalIncorrect - a.totalIncorrect);
+        const middleIndex = Math.ceil(sortedWords.length / 2);
+        const lowScorers = sortedWords.slice(0, middleIndex);
+        const highScorers = sortedWords.slice(middleIndex);
+
+        this.wordsForCurrentCycle = [...this.shuffle(lowScorers), ...this.shuffle(highScorers)];
+    },
+
+    shuffle(array) {
+        // Fisher-Yates shuffle
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    },
+
     async startNewRound() {
         this.resetRoundState();
+
+        if (this.difficulty === '1st Grade') {
+            this.startFirstGradeRound();
+        } else {
+            await this.startLLMRound();
+        }
+    },
+
+    startFirstGradeRound() {
+        if (this.wordsForCurrentCycle.length === 0) {
+            this.prepareWordCycle();
+        }
+
+        if (this.wordsForCurrentCycle.length === 0) {
+            this.setMessage('Error: No words available.', 'incorrect');
+            console.error("Could not prepare a new word cycle for 1st grade.");
+            return;
+        }
+        
+        this.currentWordObject = this.wordsForCurrentCycle.shift();
+        this.currentWord = this.currentWordObject.word.toLowerCase().trim();
+        this.currentDescription = this.currentWordObject.description_prompt;
+
+        this.pogemonName.textContent = this.currentWord;
+        this.pogemonDescription.textContent = this.currentDescription;
+
+        this.setMessage('');
+        this.speak(this.currentWord);
+        this.updateSpellingDisplay();
+    },
+    
+    async startLLMRound() {
         this.setMessage('Getting a new word...', 'loading');
 
         try {
@@ -100,6 +201,7 @@ const game = {
         this.wrongAttempts = 0;
         this.hintsGiven = 0;
         this.isChecking = false;
+        this.currentWordObject = null;
         this.revealedIndices.clear();
         this.letterInput.value = '';
         this.letterInput.disabled = false;
@@ -140,7 +242,7 @@ const game = {
 
     updateSpellingDisplay() {
         this.spellingDisplay.innerHTML = '';
-        const len = this.currentWord.length || this.userSpelling.length;
+        const len = this.currentWord.length || this.userSpelling.length || 0;
         for (let i = 0; i < len; i++) {
             const letter = this.userSpelling[i] || '';
             const box = document.createElement('div');
@@ -167,6 +269,16 @@ const game = {
         this.letterInput.disabled = true;
         this.pogemonReveal.classList.remove('hidden');
         confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+
+        // Update stats for 1st grade level before generating image
+        if (this.difficulty === '1st Grade' && this.currentWordObject) {
+            const stats = this.wordStats['1st Grade'][this.currentWordObject.word];
+            if (stats) {
+                stats.totalIncorrect += this.wrongAttempts;
+                stats.seenInInitialCycle = true;
+                this.saveWordStats();
+            }
+        }
 
         try {
             const result = await websim.imageGen({
@@ -280,6 +392,27 @@ const game = {
             localStorage.setItem(this.pogemonCollectionKey, JSON.stringify(this.collectedPogemon));
         } catch (e) {
             console.error("Error saving collection to local storage:", e);
+        }
+    },
+    
+    loadWordStats() {
+        const savedStats = localStorage.getItem(this.wordStatsKey);
+        if (savedStats) {
+            try {
+                this.wordStats = JSON.parse(savedStats);
+            } catch (e) {
+                console.error("Error loading word stats from local storage:", e);
+                localStorage.removeItem(this.wordStatsKey);
+                this.wordStats = {};
+            }
+        }
+    },
+
+    saveWordStats() {
+        try {
+            localStorage.setItem(this.wordStatsKey, JSON.stringify(this.wordStats));
+        } catch (e) {
+            console.error("Error saving word stats to local storage:", e);
         }
     },
     

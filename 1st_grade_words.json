@@ -1,0 +1,82 @@
+[
+  {
+    "word": "sun",
+    "description_prompt": "A bright, sunny monster that glows warmly and has a cheerful, round face."
+  },
+  {
+    "word": "dog",
+    "description_prompt": "A loyal and playful monster with floppy ears, a wagging tail, and a friendly bark."
+  },
+  {
+    "word": "cat",
+    "description_prompt": "A sleek, quiet monster with sharp eyes, soft fur, and a mischievous personality."
+  },
+  {
+    "word": "run",
+    "description_prompt": "A speedy monster with long legs and a streamlined body, always ready for a race."
+  },
+  {
+    "word": "big",
+    "description_prompt": "A huge, gentle giant monster that is fluffy and gives warm hugs."
+  },
+  {
+    "word": "bed",
+    "description_prompt": "A sleepy, cozy monster shaped like a pillow, that loves to nap all day."
+  },
+  {
+    "word": "hat",
+    "description_prompt": "A stylish monster that wears a different, fancy hat on its head every day."
+  },
+  {
+    "word": "pig",
+    "description_prompt": "A cute, pink monster with a curly tail and a snout for sniffing out treats."
+  },
+  {
+    "word": "box",
+    "description_prompt": "A square-shaped monster made of cardboard, who loves to hide treasures inside itself."
+  },
+  {
+    "word": "top",
+    "description_prompt": "A spinning monster that twirls like a top and has colorful stripes that blur when it moves."
+  },
+  {
+    "word": "egg",
+    "description_prompt": "A fragile, speckled monster with a shell-like body that might hatch a surprise."
+  },
+  {
+    "word": "cup",
+    "description_prompt": "A hollow monster with a handle-like ear, that loves to be filled with sweet drinks."
+  },
+  {
+    "word": "fan",
+    "description_prompt": "A breezy monster with large, leaf-like wings that create a cool gust of wind when flapped."
+  },
+  {
+    "word": "pen",
+    "description_prompt": "A tall, thin monster that draws colorful patterns on the ground wherever it walks."
+  },
+  {
+    "word": "map",
+    "description_prompt": "An adventurous monster whose skin looks like an old treasure map with mysterious lands."
+  },
+  {
+    "word": "jam",
+    "description_prompt": "A sweet, sticky monster made of berries that leaves a trail of yummy jam behind it."
+  },
+  {
+    "word": "sad",
+    "description_prompt": "A blue, droopy monster with big, teary eyes that just needs a good friend."
+  },
+  {
+    "word": "web",
+    "description_prompt": "A monster that can weave intricate, beautiful webs between trees, decorated with dew drops."
+  },
+  {
+    "word": "fish",
+    "description_prompt": "An aquatic monster with shimmering scales and fins that let it swim through the air."
+  },
+  {
+    "word": "ball",
+    "description_prompt": "A perfectly round and bouncy monster that loves to play catch."
+  }
+]
