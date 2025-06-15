@@ -272,10 +272,7 @@ const game = {
     
     resetRoundState() {
         this.pogemonRevealContainer.classList.add('hidden');
-        const cardInner = this.pogemonCard.querySelector('.card-inner');
-        if (cardInner) {
-            cardInner.classList.remove('is-flipped');
-        }
+        this.pogemonCard.classList.remove('is-flipped');
         
         this.gameArea.classList.remove('hidden');
         this.userSpelling = [];
@@ -403,12 +400,10 @@ const game = {
         this.pogemonRevealContainer.classList.remove('hidden');
         confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
         
-        const cardInner = this.pogemonCard.querySelector('.card-inner');
-        
         // Add a one-time listener to flip the card on click
         this.pogemonCard.addEventListener('click', () => {
-            if (cardInner.classList.contains('is-flipped')) return;
-            this.flipCard(cardInner);
+            if (this.pogemonCard.classList.contains('is-flipped')) return;
+            this.flipCard();
         }, { once: true });
 
         // Update stats for 1st/2nd grade level while image generates
@@ -622,41 +617,8 @@ const game = {
         }
     },
 
-    animateCardFlip(element) {
-        const duration = 800; // ms
-        let startTime = null;
-    
-        // Easing function (ease-out-cubic)
-        const easeOutCubic = t => (--t) * t * t + 1;
-    
-        const frame = (currentTime) => {
-            if (!startTime) startTime = currentTime;
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            
-            const easedProgress = easeOutCubic(progress);
-            const rotation = easedProgress * 180;
-            
-            // Add a scaling effect to make it feel more 3D
-            const scaleProgress = Math.sin(progress * Math.PI); // 0 -> 1 -> 0
-            const scale = 1 + scaleProgress * 0.1;
-            
-            element.style.transform = `rotateY(${rotation}deg) scale(${scale})`;
-            
-            if (progress < 1) {
-                requestAnimationFrame(frame);
-            } else {
-                element.style.transform = ''; // Remove inline style
-                element.classList.add('is-flipped'); // Set final state via class
-            }
-        };
-        
-        requestAnimationFrame(frame);
-    },
-
-    flipCard(cardInner) {
-        const card = this.pogemonCard;
-        card.classList.add('is-flipped');
+    flipCard() {
+        this.pogemonCard.classList.add('is-flipped');
         
         // Show the next word button after flip animation completes
         setTimeout(() => {

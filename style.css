@@ -263,27 +263,38 @@ header p {
     position: relative;
 }
 
-.card-front {
-    background-color: var(--primary-color);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    z-index: 2;
-    transform: rotateY(0deg);
-    opacity: 1;
+.card-front,
+.card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    overflow: hidden;
+    backface-visibility: hidden;
 }
 
-.card-back {
+.card-front {
     background-color: var(--card-bg);
     border: 8px solid var(--primary-color);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     padding: 15px;
+    z-index: 2;
+}
+
+.card-back {
+    background-color: var(--primary-color);
+    border: 8px solid var(--primary-color);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
     transform: rotateY(180deg);
+    color: white;
     z-index: 1;
-    opacity: 0;
 }
 
 .card.is-flipped {
@@ -328,13 +339,13 @@ header p {
 
 .card-inner.is-flipped .card-front {
     opacity: 0;
-    transform: rotateY(-180deg);
+    transform: scale(0.8);
     z-index: 1;
 }
 
 .card-inner.is-flipped .card-back {
     opacity: 1;
-    transform: rotateY(0deg);
+    transform: scale(1);
     z-index: 2;
 }
 
