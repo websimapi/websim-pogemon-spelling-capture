@@ -64,12 +64,6 @@ const game = {
 
         this.speakWordBtn.addEventListener('click', () => this.speak(this.currentWord));
         this.nextWordBtn.addEventListener('click', () => this.startNewRound());
-        this.letterInput.addEventListener('input', (e) => this.handleTextInput(e));
-        this.letterInput.addEventListener('keydown', (e) => {
-             if (e.key === 'Enter' && this.userSpelling.length === this.currentWord.length) {
-                this.checkSpelling();
-            }
-        });
         this.micBtn.addEventListener('click', () => this.toggleMic());
     },
 
