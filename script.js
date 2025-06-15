@@ -431,7 +431,6 @@ const game = {
 
             const result = JSON.parse(completion.content);
             if (result.sentence) {
-                playSound('./sentence-ready.mp3');
                 this.speak(result.sentence);
             } else {
                 this.setMessage('Could not generate a sentence.', 'incorrect');
