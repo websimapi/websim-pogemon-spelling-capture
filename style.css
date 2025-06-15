@@ -197,6 +197,147 @@ header p {
 #game-message.loading { color: var(--primary-color); }
 
 
+#pogemon-reveal-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#pogemon-reveal-container h2 {
+    font-family: 'Press Start 2P', cursive;
+}
+
+/* Card Flip Animation & Structure */
+.card-container {
+    perspective: 1000px;
+    width: 320px;
+    height: 440px;
+    margin: 10px auto;
+}
+
+.card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s;
+}
+
+.card-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.card-inner.is-flipped {
+    transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.card-front {
+    background-color: var(--card-bg);
+    border: 8px solid var(--primary-color);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+}
+
+.card-back {
+    background-color: var(--primary-color);
+    transform: rotateY(180deg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.card-back-design {
+    width: 80%;
+    height: 80%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.card-back-logo {
+    width: 60%;
+    height: 60%;
+}
+
+/* Card Content Styling */
+.pokemon-name {
+    font-family: 'Press Start 2P', cursive;
+    color: var(--text-color);
+    text-transform: capitalize;
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+    text-align: left;
+}
+
+.card-image-container {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    border: 4px solid var(--secondary-color);
+    box-sizing: border-box;
+}
+
+.card-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.stats-container {
+    background-color: var(--background-color);
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.pokemon-stats {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.card-description {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    flex-grow: 1;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.pokemon-description {
+    margin: 0;
+}
+
+
 #pogemon-reveal {
     margin-top: 20px;
 }
@@ -270,24 +411,51 @@ header p {
 
 #gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
 }
 
 .gallery-item {
-    aspect-ratio: 1 / 1;
+    background-color: var(--card-bg);
     border-radius: 10px;
     overflow: hidden;
     cursor: pointer;
     position: relative;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: 4px solid var(--primary-color);
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
-.gallery-item img {
+.gallery-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+.gallery-item .gallery-card-image-container {
+    width: 100%;
+    aspect-ratio: 1/1;
+}
+
+.gallery-item .gallery-card-image-container img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s;
+}
+
+.gallery-item .gallery-card-info {
+    padding: 10px;
+    background-color: var(--background-color);
+}
+
+.gallery-item .gallery-card-name {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7rem;
+    margin: 0;
+    color: var(--text-color);
+    text-transform: capitalize;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .gallery-item:hover img {
@@ -353,4 +521,3 @@ header p {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-

@@ -11,10 +11,12 @@ const game = {
     micBtn: document.getElementById('mic-btn'),
     micStatus: document.getElementById('mic-status'),
     gameMessage: document.getElementById('game-message'),
-    pogemonReveal: document.getElementById('pogemon-reveal'),
-    pogemonImageContainer: document.getElementById('pogemon-image-container'),
-    pogemonName: document.getElementById('pogemon-name'),
-    pogemonDescription: document.getElementById('pogemon-description'),
+    pogemonRevealContainer: document.getElementById('pogemon-reveal-container'),
+    pogemonCard: document.getElementById('pogemon-card'),
+    pogemonImageContainer: document.getElementById('card-pogemon-image-container'),
+    pogemonName: document.getElementById('card-pogemon-name'),
+    pogemonDescription: document.getElementById('card-pogemon-description'),
+    pogemonStats: document.getElementById('card-pogemon-stats'),
     nextWordBtn: document.getElementById('next-word-btn'),
     galleryGrid: document.getElementById('gallery-grid'),
 
@@ -199,6 +201,7 @@ const game = {
 
         this.pogemonName.textContent = this.currentWord;
         this.pogemonDescription.textContent = this.currentDescription;
+        this.pogemonStats.textContent = this.difficulty;
 
         this.setMessage('');
         this.speak(this.currentWord);
@@ -232,6 +235,7 @@ const game = {
 
         this.pogemonName.textContent = this.currentWord;
         this.pogemonDescription.textContent = this.currentDescription;
+        this.pogemonStats.textContent = this.difficulty;
 
         this.setMessage('');
         this.speak(this.currentWord);
@@ -262,6 +266,7 @@ const game = {
             
             this.pogemonName.textContent = this.currentWord;
             this.pogemonDescription.textContent = this.currentDescription;
+            this.pogemonStats.textContent = this.difficulty;
 
             this.setMessage('');
             this.speak(this.currentWord);
@@ -273,7 +278,12 @@ const game = {
     },
     
     resetRoundState() {
-        this.pogemonReveal.classList.add('hidden');
+        this.pogemonRevealContainer.classList.add('hidden');
+        const cardInner = this.pogemonCard.querySelector('.card-inner');
+        if (cardInner) {
+            cardInner.classList.remove('is-flipped');
+        }
+        
         this.gameArea.classList.remove('hidden');
         this.userSpelling = [];
         this.wrongAttempts = 0;
@@ -346,8 +356,14 @@ const game = {
     async handleCorrectSpelling() {
         this.setMessage('Correct!', 'correct');
         this.letterInput.disabled = true;
-        this.pogemonReveal.classList.remove('hidden');
+        
+        this.pogemonRevealContainer.classList.remove('hidden');
         confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+        
+        const cardInner = this.pogemonCard.querySelector('.card-inner');
+        setTimeout(() => {
+            if (cardInner) cardInner.classList.add('is-flipped');
+        }, 250);
 
         // Update stats for 1st/2nd grade level before generating image
         const gradeForStats = this.crossGradeLevel || this.difficulty;
@@ -438,7 +454,12 @@ const game = {
             const item = document.createElement('div');
             item.className = 'gallery-item';
             item.innerHTML = `
-                <img src="${p.imageUrl}" alt="${p.word}">
+                <div class="gallery-card-image-container">
+                    <img src="${p.imageUrl}" alt="${p.word}">
+                </div>
+                <div class="gallery-card-info">
+                    <h3 class="gallery-card-name">${p.word}</h3>
+                </div>
                 <div class="tooltip">
                     <strong>${p.word}</strong>
                     <p>${p.description}</p>
