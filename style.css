@@ -221,7 +221,6 @@ header p {
     height: 100%;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 0.8s;
 }
 
 .card-inner {
@@ -230,6 +229,7 @@ header p {
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    cursor: pointer;
 }
 
 .card-inner.is-flipped {

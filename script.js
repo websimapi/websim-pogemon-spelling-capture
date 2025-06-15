@@ -356,16 +356,21 @@ const game = {
     async handleCorrectSpelling() {
         this.setMessage('Correct!', 'correct');
         this.letterInput.disabled = true;
-        
+        this.nextWordBtn.classList.add('hidden'); // Ensure button is hidden until flip
+
         this.pogemonRevealContainer.classList.remove('hidden');
         confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
         
         const cardInner = this.pogemonCard.querySelector('.card-inner');
-        setTimeout(() => {
-            if (cardInner) cardInner.classList.add('is-flipped');
-        }, 250);
+        
+        // Add a one-time listener to flip the card on click
+        this.pogemonCard.addEventListener('click', () => {
+            if (cardInner.classList.contains('is-flipped')) return;
+            cardInner.classList.add('is-flipped');
+            this.nextWordBtn.classList.remove('hidden');
+        }, { once: true });
 
-        // Update stats for 1st/2nd grade level before generating image
+        // Update stats for 1st/2nd grade level while image generates
         const gradeForStats = this.crossGradeLevel || this.difficulty;
         if ((gradeForStats === '1st Grade' || gradeForStats === '2nd Grade') && this.currentWordObject) {
             const stats = this.wordStats[gradeForStats]?.[this.currentWordObject.word];
