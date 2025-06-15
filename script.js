@@ -27,12 +27,14 @@ const game = {
     hintsGiven: 0,
     revealedIndices: new Set(),
     collectedPogemon: [],
+    pogemonCollectionKey: 'pogemon-collection',
     speechRecognition: null,
     isChecking: false,
 
     init() {
         this.addEventListeners();
         this.setupSpeechRecognition();
+        this.loadCollectionFromStorage();
     },
 
     addEventListeners() {
@@ -182,6 +184,7 @@ const game = {
                 imageUrl: result.url
             };
             this.collectedPogemon.push(captured);
+            this.saveCollectionToStorage();
             this.updateGallery();
         } catch (error) {
             console.error('Image generation failed:', error);
@@ -257,6 +260,28 @@ const game = {
         this.gameMessage.textContent = text;
         this.gameMessage.className = `game-message ${type}`;
     },
+
+    loadCollectionFromStorage() {
+        const savedCollection = localStorage.getItem(this.pogemonCollectionKey);
+        if (savedCollection) {
+            try {
+                this.collectedPogemon = JSON.parse(savedCollection);
+                this.updateGallery();
+            } catch (e) {
+                console.error("Error loading collection from local storage:", e);
+                localStorage.removeItem(this.pogemonCollectionKey);
+                this.collectedPogemon = [];
+            }
+        }
+    },
+
+    saveCollectionToStorage() {
+        try {
+            localStorage.setItem(this.pogemonCollectionKey, JSON.stringify(this.collectedPogemon));
+        } catch (e) {
+            console.error("Error saving collection to local storage:", e);
+        }
+    },
     
     setupSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -319,4 +344,3 @@ const game = {
 };
 
 game.init();
-
