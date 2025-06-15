@@ -22,7 +22,8 @@ const game = {
     difficulty: '3rd Grade',
     currentWord: '',
     currentDescription: '',
-    currentWordObject: null, // For 1st grade word data
+    currentWordObject: null, // For 1st/2nd grade word data
+    crossGradeLevel: null, // To track words from lower grades
     userSpelling: [],
     wrongAttempts: 0,
     hintsGiven: 0,
@@ -32,6 +33,7 @@ const game = {
     wordStats: {},
     wordStatsKey: 'pogemon-word-stats',
     wordsForCurrentCycle: [],
+    firstGradeWords: [], // To store words from the grade below
     speechRecognition: null,
     isChecking: false,
 
@@ -51,6 +53,8 @@ const game = {
                 
                 if (this.difficulty === '1st Grade') {
                     await this.setupFirstGradeLevel();
+                } else if (this.difficulty === '2nd Grade') {
+                    await this.setupSecondGradeLevel();
                 }
                 
                 await this.startNewRound();
@@ -97,8 +101,47 @@ const game = {
         }
     },
 
+    async setupSecondGradeLevel() {
+        this.setMessage('Loading 2nd grade words...', 'loading');
+        try {
+            // Load 1st grade words for the 1/8 chance mechanic
+            const firstGradeResponse = await fetch('./1st_grade_words.json');
+            if (!firstGradeResponse.ok) throw new Error('Network response for 1st grade words was not ok');
+            this.firstGradeWords = await firstGradeResponse.json();
+
+            // Load 2nd grade words
+            const secondGradeResponse = await fetch('./2nd_grade_words.json');
+            if (!secondGradeResponse.ok) throw new Error('Network response for 2nd grade words was not ok');
+            const wordList = await secondGradeResponse.json();
+
+            // Initialize stats for 1st grade words if not already done, as they can appear in 2nd grade
+            if (!this.wordStats['1st Grade']) {
+                this.wordStats['1st Grade'] = {};
+                this.firstGradeWords.forEach(wordObj => {
+                    this.wordStats['1st Grade'][wordObj.word] = { totalIncorrect: 0, seenInInitialCycle: false, ...wordObj };
+                });
+            }
+
+            // Initialize stats for 2nd grade words
+            if (!this.wordStats['2nd Grade']) {
+                this.wordStats['2nd Grade'] = {};
+                wordList.forEach(wordObj => {
+                    this.wordStats['2nd Grade'][wordObj.word] = { totalIncorrect: 0, seenInInitialCycle: false, ...wordObj };
+                });
+                this.saveWordStats();
+            }
+            
+            this.prepareWordCycle();
+
+        } catch (error) {
+            console.error('Failed to load grade level words:', error);
+            this.setMessage('Could not load words. Reverting to default.', 'incorrect');
+            this.difficulty = '3rd Grade'; // Revert
+        }
+    },
+
     prepareWordCycle() {
-        const gradeStats = this.wordStats['1st Grade'];
+        const gradeStats = this.wordStats[this.difficulty];
         if (!gradeStats) return;
         const allWords = Object.values(gradeStats);
 
@@ -132,6 +175,8 @@ const game = {
 
         if (this.difficulty === '1st Grade') {
             this.startFirstGradeRound();
+        } else if (this.difficulty === '2nd Grade') {
+            this.startSecondGradeRound();
         } else {
             await this.startLLMRound();
         }
@@ -149,6 +194,39 @@ const game = {
         }
         
         this.currentWordObject = this.wordsForCurrentCycle.shift();
+        this.currentWord = this.currentWordObject.word.toLowerCase().trim();
+        this.currentDescription = this.currentWordObject.description_prompt;
+
+        this.pogemonName.textContent = this.currentWord;
+        this.pogemonDescription.textContent = this.currentDescription;
+
+        this.setMessage('');
+        this.speak(this.currentWord);
+        this.updateSpellingDisplay();
+    },
+    
+    startSecondGradeRound() {
+        // 1/8 chance to get a word from the grade below
+        if (Math.random() < 0.125 && this.firstGradeWords.length > 0) {
+            // Pick a random 1st grade word
+            this.currentWordObject = this.firstGradeWords[Math.floor(Math.random() * this.firstGradeWords.length)];
+            this.crossGradeLevel = '1st Grade';
+        } else {
+            // Pick a 2nd grade word using the cycle logic
+            if (this.wordsForCurrentCycle.length === 0) {
+                this.prepareWordCycle();
+            }
+
+            if (this.wordsForCurrentCycle.length === 0) {
+                this.setMessage('Error: No 2nd grade words available.', 'incorrect');
+                console.error("Could not prepare a new word cycle for 2nd grade.");
+                return;
+            }
+            
+            this.currentWordObject = this.wordsForCurrentCycle.shift();
+            this.crossGradeLevel = null;
+        }
+
         this.currentWord = this.currentWordObject.word.toLowerCase().trim();
         this.currentDescription = this.currentWordObject.description_prompt;
 
@@ -202,6 +280,7 @@ const game = {
         this.hintsGiven = 0;
         this.isChecking = false;
         this.currentWordObject = null;
+        this.crossGradeLevel = null;
         this.revealedIndices.clear();
         this.letterInput.value = '';
         this.letterInput.disabled = false;
@@ -270,9 +349,10 @@ const game = {
         this.pogemonReveal.classList.remove('hidden');
         confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
 
-        // Update stats for 1st grade level before generating image
-        if (this.difficulty === '1st Grade' && this.currentWordObject) {
-            const stats = this.wordStats['1st Grade'][this.currentWordObject.word];
+        // Update stats for 1st/2nd grade level before generating image
+        const gradeForStats = this.crossGradeLevel || this.difficulty;
+        if ((gradeForStats === '1st Grade' || gradeForStats === '2nd Grade') && this.currentWordObject) {
+            const stats = this.wordStats[gradeForStats]?.[this.currentWordObject.word];
             if (stats) {
                 stats.totalIncorrect += this.wrongAttempts;
                 stats.seenInInitialCycle = true;
