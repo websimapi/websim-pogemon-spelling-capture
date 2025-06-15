@@ -408,7 +408,7 @@ const game = {
         // Add a one-time listener to flip the card on click
         this.pogemonCard.addEventListener('click', () => {
             if (cardInner.classList.contains('is-flipped')) return;
-            cardInner.classList.add('is-flipped');
+            this.animateCardFlip(cardInner);
             this.nextWordBtn.classList.remove('hidden');
         }, { once: true });
 
@@ -621,6 +621,38 @@ const game = {
                 console.error("Mic already started", e);
             }
         }
+    },
+
+    animateCardFlip(element) {
+        const duration = 800; // ms
+        let startTime = null;
+    
+        // Easing function (ease-out-cubic)
+        const easeOutCubic = t => (--t) * t * t + 1;
+    
+        const frame = (currentTime) => {
+            if (!startTime) startTime = currentTime;
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const easedProgress = easeOutCubic(progress);
+            const rotation = easedProgress * 180;
+            
+            // Add a scaling effect to make it feel more 3D
+            const scaleProgress = Math.sin(progress * Math.PI); // 0 -> 1 -> 0
+            const scale = 1 + scaleProgress * 0.1;
+            
+            element.style.transform = `rotateY(${rotation}deg) scale(${scale})`;
+            
+            if (progress < 1) {
+                requestAnimationFrame(frame);
+            } else {
+                element.style.transform = ''; // Remove inline style
+                element.classList.add('is-flipped'); // Set final state via class
+            }
+        };
+        
+        requestAnimationFrame(frame);
     }
 };
 
