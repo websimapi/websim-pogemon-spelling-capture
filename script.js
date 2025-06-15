@@ -655,12 +655,13 @@ const game = {
     },
 
     flipCard(cardInner) {
-        cardInner.classList.add('is-flipped');
+        const card = this.pogemonCard;
+        card.classList.add('is-flipped');
         
         // Show the next word button after flip animation completes
         setTimeout(() => {
             this.nextWordBtn.classList.remove('hidden');
-        }, 600);
+        }, 800);
     }
 };
 
