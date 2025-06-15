@@ -272,7 +272,6 @@ const game = {
     
     resetRoundState() {
         this.pogemonRevealContainer.classList.add('hidden');
-        this.pogemonCard.classList.remove('is-flipped');
         
         this.gameArea.classList.remove('hidden');
         this.userSpelling = [];
@@ -395,17 +394,11 @@ const game = {
     async handleCorrectSpelling() {
         this.setMessage('Correct!', 'correct');
         this.spellingDisplay.querySelectorAll('input').forEach(input => input.disabled = true);
-        this.nextWordBtn.classList.add('hidden'); // Ensure button is hidden until flip
+        this.nextWordBtn.classList.add('hidden'); // Ensure button is hidden until reveal
 
         this.pogemonRevealContainer.classList.remove('hidden');
         confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
         
-        // Add a one-time listener to flip the card on click
-        this.pogemonCard.addEventListener('click', () => {
-            if (this.pogemonCard.classList.contains('is-flipped')) return;
-            this.flipCard();
-        }, { once: true });
-
         // Update stats for 1st/2nd grade level while image generates
         const gradeForStats = this.crossGradeLevel || this.difficulty;
         if ((gradeForStats === '1st Grade' || gradeForStats === '2nd Grade') && this.currentWordObject) {
@@ -438,6 +431,8 @@ const game = {
         } catch (error) {
             console.error('Image generation failed:', error);
             this.pogemonImageContainer.innerHTML = '<p>Could not generate image.</p>';
+        } finally {
+            this.nextWordBtn.classList.remove('hidden');
         }
     },
 
