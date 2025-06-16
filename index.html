@@ -11,7 +11,10 @@
     <div id="game-container">
         <header>
             <button id="back-to-menu-btn" class="hidden" title="Back to Main Menu"></button>
-            <button id="collection-btn" title="View Your Pogemon Collection"></button>
+            <div class="header-actions">
+                <button id="score-btn" title="View Your Scores"></button>
+                <button id="collection-btn" title="View Your Pogemon Collection"></button>
+            </div>
         </header>
 
         <div id="difficulty-selection">
@@ -76,6 +79,13 @@
             <h2>Your Pogemon Collection</h2>
             <div id="gallery-grid">
                 <p>Capture your first Pogemon to start your collection!</p>
+            </div>
+        </div>
+
+        <div id="score-view" class="hidden">
+            <h2>Your Scores</h2>
+            <div id="score-details">
+                <p>Play some rounds to see your word stats!</p>
             </div>
         </div>
     </div>

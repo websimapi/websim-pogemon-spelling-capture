@@ -46,6 +46,9 @@ const game = {
     pogemonGallery: document.getElementById('pogemon-gallery'),
     galleryGrid: document.getElementById('gallery-grid'),
     collectionBtn: document.getElementById('collection-btn'),
+    scoreBtn: document.getElementById('score-btn'),
+    scoreView: document.getElementById('score-view'),
+    scoreDetails: document.getElementById('score-details'),
 
     // Game State
     difficulty: '3rd Grade',
@@ -100,14 +103,17 @@ const game = {
         this.nextWordBtn.addEventListener('click', () => this.startNewRound());
         this.micBtn.addEventListener('click', () => this.toggleMic());
         this.collectionBtn.addEventListener('click', () => this.showGallery());
+        this.scoreBtn.addEventListener('click', () => this.showScores());
     },
 
     goBackToMenu() {
         this.gameArea.classList.add('hidden');
         this.pogemonGallery.classList.add('hidden');
+        this.scoreView.classList.add('hidden');
         this.difficultySelection.classList.remove('hidden');
         this.backToMenuBtn.classList.add('hidden');
         this.collectionBtn.classList.remove('hidden');
+        this.scoreBtn.classList.remove('hidden');
 
         // Stop any ongoing processes
         if (typeof window.speechSynthesis !== 'undefined') {
@@ -124,10 +130,12 @@ const game = {
     showGallery() {
         this.difficultySelection.classList.add('hidden');
         this.gameArea.classList.add('hidden');
+        this.scoreView.classList.add('hidden');
         this.pogemonGallery.classList.remove('hidden');
 
         this.backToMenuBtn.classList.remove('hidden');
         this.collectionBtn.classList.add('hidden');
+        this.scoreBtn.classList.add('hidden');
 
         // Stop any ongoing game processes
         if (typeof window.speechSynthesis !== 'undefined') {
@@ -137,6 +145,68 @@ const game = {
             this.speechRecognition.stop();
         }
         this.setMessage('');
+    },
+
+    showScores() {
+        this.difficultySelection.classList.add('hidden');
+        this.gameArea.classList.add('hidden');
+        this.pogemonGallery.classList.add('hidden');
+        this.scoreView.classList.remove('hidden');
+
+        this.backToMenuBtn.classList.remove('hidden');
+        this.collectionBtn.classList.add('hidden');
+        this.scoreBtn.classList.add('hidden');
+
+        // Stop any ongoing game processes
+        if (typeof window.speechSynthesis !== 'undefined') {
+            window.speechSynthesis.cancel();
+        }
+        if (this.speechRecognition && this.micBtn.classList.contains('recording')) {
+            this.speechRecognition.stop();
+        }
+        this.renderScores();
+        this.setMessage('');
+    },
+
+    renderScores() {
+        this.scoreDetails.innerHTML = '';
+        const gradeLevels = Object.keys(this.wordStats);
+        let htmlContent = '';
+
+        gradeLevels.forEach(grade => {
+            const gradeStats = this.wordStats[grade];
+            if (!gradeStats) return;
+
+            const words = Object.values(gradeStats).filter(word => word.seenInInitialCycle);
+            if (words.length > 0) {
+                words.sort((a, b) => b.totalIncorrect - a.totalIncorrect);
+                
+                const tableRows = words.map(wordData => `<tr><td>${wordData.word}</td><td>${wordData.totalIncorrect}</td></tr>`).join('');
+                
+                htmlContent += `
+                    <div class="grade-scores">
+                        <h3>${grade}</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Word</th>
+                                    <th>Incorrect Attempts</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+        });
+
+        if (htmlContent) {
+            this.scoreDetails.innerHTML = htmlContent;
+        } else {
+            this.scoreDetails.innerHTML = '<p>Play some rounds to see your word stats!</p>';
+        }
     },
 
     async setupFirstGradeLevel() {
