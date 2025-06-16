@@ -264,7 +264,6 @@ const game = {
         this.currentWord = this.currentWordObject.word.toLowerCase().trim();
         this.currentDescription = this.currentWordObject.description_prompt;
 
-        this.setMessage('');
         this.speak(this.currentWord);
         this.updateSpellingDisplay();
     },
@@ -294,7 +293,6 @@ const game = {
         this.currentWord = this.currentWordObject.word.toLowerCase().trim();
         this.currentDescription = this.currentWordObject.description_prompt;
 
-        this.setMessage('');
         this.speak(this.currentWord);
         this.updateSpellingDisplay();
     },
@@ -321,11 +319,6 @@ const game = {
             this.currentWord = result.word.toLowerCase().trim().replace(/[^a-z]/gi, '');
             this.currentDescription = result.description;
             
-            this.pogemonName.textContent = this.currentWord;
-            this.pogemonDescription.textContent = this.currentDescription;
-            this.pogemonStats.textContent = this.difficulty;
-
-            this.setMessage('');
             this.speak(this.currentWord);
             this.updateSpellingDisplay();
         } catch (error) {
@@ -341,6 +334,7 @@ const game = {
         this.pogemonDescription.textContent = 'Spell the word to reveal this Pogemon!';
         this.pogemonStats.textContent = this.difficulty;
         this.nextWordBtn.classList.add('hidden');
+        this.setMessage('');
         
         this.gameArea.classList.remove('hidden');
         this.userSpelling = [];
@@ -458,28 +452,39 @@ const game = {
                 messages: [
                     {
                         role: 'system',
-                        content: `You generate simple sentences for a spelling game. Respond directly with JSON, following this JSON schema, and no other text: { "sentence": "string" }`
+                        content: `You generate simple sentences for a spelling game. Respond directly with JSON, following this JSON schema, and no other text: { "sentence": "string" }`,
                     },
                     {
                         role: 'user',
-                        content: `Create a simple, age-appropriate sentence for a ${this.difficulty} level speller using the word "${this.currentWord}".`
-                    }
+                        content: `Create a simple, age-appropriate sentence for a ${this.difficulty} level speller using the word "${this.currentWord}".`,
+                    },
                 ],
                 json: true,
             });
 
             const result = JSON.parse(completion.content);
             if (result.sentence) {
-                this.speak(result.sentence);
+                // Reveal description as a hint
+                this.pogemonDescription.textContent = this.currentDescription;
+
+                const sentence = result.sentence;
+                this.speak(sentence);
+
+                // Obfuscate word for display
+                const regex = new RegExp(`\\b${this.currentWord}\\b`, 'gi');
+                const obfuscatedSentence = sentence.replace(regex, '____');
+                this.setMessage(obfuscatedSentence, 'hint-sentence');
+
+                // Reset button text but keep it disabled for this round
+                this.useInSentenceBtn.querySelector('span').textContent = 'Use in Sentence';
             } else {
                 this.setMessage('Could not generate a sentence.', 'incorrect');
+                this.useInSentenceBtn.disabled = false; // Re-enable on failure
             }
         } catch (error) {
             console.error('Error fetching sentence:', error);
             this.setMessage('Could not get a sentence. Please try again.', 'incorrect');
-        } finally {
-            this.useInSentenceBtn.disabled = false;
-            this.useInSentenceBtn.querySelector('span').textContent = 'Use in Sentence';
+            this.useInSentenceBtn.disabled = false; // Re-enable on error
         }
     },
 
@@ -548,6 +553,7 @@ const game = {
     },
 
     handleIncorrectSpelling() {
+        playSound('./incorrect.mp3');
         this.setMessage('Try again!', 'incorrect');
         this.wrongAttempts++;
         

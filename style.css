@@ -334,6 +334,10 @@ header p {
 #game-message.correct { color: var(--correct-color); }
 #game-message.incorrect { color: var(--wrong-color); }
 #game-message.loading { color: var(--primary-color); }
+#game-message.hint-sentence {
+    color: var(--primary-color);
+    font-style: italic;
+}
 
 #pogemon-reveal-container {
     /* Styles are now controlled by flex parent */
