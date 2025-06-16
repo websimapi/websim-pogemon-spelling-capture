@@ -548,7 +548,6 @@ const game = {
     },
 
     handleIncorrectSpelling() {
-        playSound('./incorrect.mp3');
         this.setMessage('Try again!', 'incorrect');
         this.wrongAttempts++;
         
