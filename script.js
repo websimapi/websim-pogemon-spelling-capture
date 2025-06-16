@@ -221,10 +221,6 @@ const game = {
         this.currentWord = this.currentWordObject.word.toLowerCase().trim();
         this.currentDescription = this.currentWordObject.description_prompt;
 
-        this.pogemonName.textContent = this.currentWord;
-        this.pogemonDescription.textContent = this.currentDescription;
-        this.pogemonStats.textContent = this.difficulty;
-
         this.setMessage('');
         this.speak(this.currentWord);
         this.updateSpellingDisplay();
@@ -254,10 +250,6 @@ const game = {
 
         this.currentWord = this.currentWordObject.word.toLowerCase().trim();
         this.currentDescription = this.currentWordObject.description_prompt;
-
-        this.pogemonName.textContent = this.currentWord;
-        this.pogemonDescription.textContent = this.currentDescription;
-        this.pogemonStats.textContent = this.difficulty;
 
         this.setMessage('');
         this.speak(this.currentWord);
@@ -300,7 +292,12 @@ const game = {
     },
     
     resetRoundState() {
-        this.pogemonRevealContainer.classList.add('hidden');
+        this.pogemonCard.classList.add('pre-reveal');
+        this.pogemonImageContainer.innerHTML = '<div class="card-back-content">?</div>';
+        this.pogemonName.textContent = '?????';
+        this.pogemonDescription.textContent = 'Spell the word to reveal this Pogemon!';
+        this.pogemonStats.textContent = this.difficulty;
+        this.nextWordBtn.classList.add('hidden');
         
         this.gameArea.classList.remove('hidden');
         this.userSpelling = [];
@@ -312,7 +309,6 @@ const game = {
         this.revealedIndices.clear();
         this.hintDisplay.innerHTML = '';
         this.spellingDisplay.innerHTML = '';
-        this.pogemonImageContainer.innerHTML = '<div class="loader"></div>';
         this.useInSentenceBtn.disabled = false;
         this.useInSentenceBtn.querySelector('span').textContent = 'Use in Sentence';
     },
@@ -464,7 +460,11 @@ const game = {
         this.spellingDisplay.querySelectorAll('input').forEach(input => input.disabled = true);
         this.nextWordBtn.classList.add('hidden'); // Ensure button is hidden until reveal
 
-        this.pogemonRevealContainer.classList.remove('hidden');
+        this.pogemonName.textContent = this.currentWord;
+        this.pogemonDescription.textContent = this.currentDescription;
+        this.pogemonCard.classList.remove('pre-reveal');
+        this.pogemonImageContainer.innerHTML = '<div class="loader"></div>';
+
         confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
         
         // Update stats for 1st/2nd grade level while image generates
