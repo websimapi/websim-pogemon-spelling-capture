@@ -43,7 +43,9 @@ const game = {
     pogemonDescription: document.getElementById('card-pogemon-description'),
     pogemonStats: document.getElementById('card-pogemon-stats'),
     nextWordBtn: document.getElementById('next-word-btn'),
+    pogemonGallery: document.getElementById('pogemon-gallery'),
     galleryGrid: document.getElementById('gallery-grid'),
+    collectionBtn: document.getElementById('collection-btn'),
 
     // Game State
     difficulty: '3rd Grade',
@@ -97,12 +99,15 @@ const game = {
         this.useInSentenceBtn.addEventListener('click', () => this.getAndSpeakSentence());
         this.nextWordBtn.addEventListener('click', () => this.startNewRound());
         this.micBtn.addEventListener('click', () => this.toggleMic());
+        this.collectionBtn.addEventListener('click', () => this.showGallery());
     },
 
     goBackToMenu() {
         this.gameArea.classList.add('hidden');
+        this.pogemonGallery.classList.add('hidden');
         this.difficultySelection.classList.remove('hidden');
         this.backToMenuBtn.classList.add('hidden');
+        this.collectionBtn.classList.remove('hidden');
 
         // Stop any ongoing processes
         if (typeof window.speechSynthesis !== 'undefined') {
@@ -113,6 +118,24 @@ const game = {
         }
         
         // Reset message
+        this.setMessage('');
+    },
+
+    showGallery() {
+        this.difficultySelection.classList.add('hidden');
+        this.gameArea.classList.add('hidden');
+        this.pogemonGallery.classList.remove('hidden');
+
+        this.backToMenuBtn.classList.remove('hidden');
+        this.collectionBtn.classList.add('hidden');
+
+        // Stop any ongoing game processes
+        if (typeof window.speechSynthesis !== 'undefined') {
+            window.speechSynthesis.cancel();
+        }
+        if (this.speechRecognition && this.micBtn.classList.contains('recording')) {
+            this.speechRecognition.stop();
+        }
         this.setMessage('');
     },
 
