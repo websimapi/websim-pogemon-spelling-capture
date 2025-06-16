@@ -28,6 +28,7 @@ const game = {
     // DOM Elements
     difficultySelection: document.getElementById('difficulty-selection'),
     gameArea: document.getElementById('game-area'),
+    backToMenuBtn: document.getElementById('back-to-menu-btn'),
     speakWordBtn: document.getElementById('speak-word-btn'),
     useInSentenceBtn: document.getElementById('use-in-sentence-btn'),
     spellingDisplay: document.getElementById('spelling-display'),
@@ -79,6 +80,7 @@ const game = {
                 this.difficulty = e.target.dataset.level;
                 this.difficultySelection.classList.add('hidden');
                 this.gameArea.classList.remove('hidden');
+                this.backToMenuBtn.classList.remove('hidden');
                 
                 if (this.difficulty === '1st Grade') {
                     await this.setupFirstGradeLevel();
@@ -90,10 +92,28 @@ const game = {
             }
         });
 
+        this.backToMenuBtn.addEventListener('click', () => this.goBackToMenu());
         this.speakWordBtn.addEventListener('click', () => this.speak(this.currentWord));
         this.useInSentenceBtn.addEventListener('click', () => this.getAndSpeakSentence());
         this.nextWordBtn.addEventListener('click', () => this.startNewRound());
         this.micBtn.addEventListener('click', () => this.toggleMic());
+    },
+
+    goBackToMenu() {
+        this.gameArea.classList.add('hidden');
+        this.difficultySelection.classList.remove('hidden');
+        this.backToMenuBtn.classList.add('hidden');
+
+        // Stop any ongoing processes
+        if (typeof window.speechSynthesis !== 'undefined') {
+            window.speechSynthesis.cancel();
+        }
+        if (this.speechRecognition && this.micBtn.classList.contains('recording')) {
+            this.speechRecognition.stop();
+        }
+        
+        // Reset message
+        this.setMessage('');
     },
 
     async setupFirstGradeLevel() {
