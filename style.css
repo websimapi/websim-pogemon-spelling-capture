@@ -101,7 +101,7 @@ header p {
     transform: none;
 }
 
-.image-button {
+#difficulty-selection button.image-button {
     padding: 0;
     width: 250px;
     height: 125px;
@@ -109,9 +109,10 @@ header p {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
+    border: none;
 }
 
-.image-button:hover:not(:disabled) {
+#difficulty-selection button.image-button:hover:not(:disabled) {
     background-color: transparent;
     transform: scale(1.1);
 }
