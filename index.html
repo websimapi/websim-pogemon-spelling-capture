@@ -15,13 +15,15 @@
 
         <div id="difficulty-selection">
             <h2>Choose your level:</h2>
-            <button data-level="1st Grade">Grade 1</button>
-            <button data-level="2nd Grade">Grade 2</button>
-            <button data-level="3rd Grade">Grade 3</button>
-            <button data-level="5th Grade">Grade 5</button>
-            <button data-level="8th Grade">Grade 8</button>
-            <button data-level="High School">High School</button>
-            <button data-level="College">College</button>
+            <div class="difficulty-buttons">
+                <button data-level="1st Grade" class="image-button" id="grade-1-btn" title="Grade 1"></button>
+                <button data-level="2nd Grade" class="image-button" id="grade-2-btn" title="Grade 2"></button>
+                <button data-level="3rd Grade" disabled>Grade 3</button>
+                <button data-level="5th Grade" disabled>Grade 5</button>
+                <button data-level="8th Grade" disabled>Grade 8</button>
+                <button data-level="High School" disabled>High School</button>
+                <button data-level="College" disabled>College</button>
+            </div>
         </div>
 
         <div id="game-area" class="hidden">
