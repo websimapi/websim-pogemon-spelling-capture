@@ -444,7 +444,9 @@ const game = {
             const result = JSON.parse(completion.content);
             this.currentWord = result.word.toLowerCase().trim().replace(/[^a-z]/gi, '');
             this.currentDescription = result.description;
+            this.currentWordObject = { word: this.currentWord, description_prompt: this.currentDescription };
             
+            this.setMessage('');
             this.speak(this.currentWord);
             this.updateSpellingDisplay();
         } catch (error) {
@@ -660,16 +662,29 @@ const game = {
             this.saveStreak();
         }
 
-        // Update stats for 1st/2nd grade level while image generates
+        // Update stats
         const gradeForStats = this.crossGradeLevel || this.difficulty;
-        if ((gradeForStats === '1st Grade' || gradeForStats === '2nd Grade') && this.currentWordObject) {
-            const stats = this.wordStats[gradeForStats]?.[this.currentWordObject.word];
-            if (stats) {
-                stats.totalIncorrect += this.wrongAttempts;
-                stats.totalCorrect = (stats.totalCorrect || 0) + 1;
-                stats.seenInInitialCycle = true;
-                this.saveWordStats();
+        if (this.currentWordObject) {
+            if (!this.wordStats[gradeForStats]) {
+                this.wordStats[gradeForStats] = {};
             }
+            
+            let stats = this.wordStats[gradeForStats][this.currentWordObject.word];
+            
+            if (!stats) { // First time seeing this word
+                stats = {
+                    totalIncorrect: 0,
+                    totalCorrect: 0,
+                    seenInInitialCycle: false,
+                    ...this.currentWordObject
+                };
+                this.wordStats[gradeForStats][this.currentWordObject.word] = stats;
+            }
+
+            stats.totalIncorrect += this.wrongAttempts;
+            stats.totalCorrect = (stats.totalCorrect || 0) + 1;
+            stats.seenInInitialCycle = true;
+            this.saveWordStats();
         }
 
         try {
