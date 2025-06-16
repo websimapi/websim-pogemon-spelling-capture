@@ -69,8 +69,8 @@ const game = {
     firstGradeWords: [], // To store words from the grade below
     speechRecognition: null,
     isChecking: false,
-    currentStreak: 0,
-    highestStreak: 0,
+    currentStreaks: {},
+    highestStreaks: {},
 
     init() {
         this.addEventListeners();
@@ -130,8 +130,8 @@ const game = {
         // Reset message
         this.setMessage('');
         
-        // Reset current streak
-        this.currentStreak = 0;
+        // Reset current streaks
+        this.currentStreaks = {};
     },
 
     showGallery() {
@@ -177,30 +177,38 @@ const game = {
 
     renderScores() {
         this.scoreDetails.innerHTML = '';
-        const gradeLevels = Object.keys(this.wordStats);
+        
+        const gradeLevels = [...new Set([...Object.keys(this.wordStats), ...Object.keys(this.highestStreaks)])];
+        gradeLevels.sort();
 
-        const streakHTML = `
-            <div class="streak-info">
-                <p><strong>Highest Streak:</strong> ${this.highestStreak}</p>
-                <p><strong>Current Streak:</strong> ${this.currentStreak}</p>
-            </div>
-        `;
+        if (gradeLevels.length === 0) {
+            this.scoreDetails.innerHTML = '<p>Play some rounds to see your scores and streaks!</p>';
+            return;
+        }
 
         let htmlContent = '';
 
         gradeLevels.forEach(grade => {
             const gradeStats = this.wordStats[grade];
-            if (!gradeStats) return;
+            const highestStreak = this.highestStreaks[grade]?.highest || 0;
+            const currentStreak = this.currentStreaks[grade] || 0;
 
-            const words = Object.values(gradeStats).filter(word => word.seenInInitialCycle);
-            if (words.length > 0) {
-                words.sort((a, b) => b.totalIncorrect - a.totalIncorrect);
-                
-                const tableRows = words.map(wordData => `<tr><td>${wordData.word}</td><td>${wordData.totalCorrect || 0}</td><td>${wordData.totalIncorrect}</td></tr>`).join('');
-                
-                htmlContent += `
-                    <div class="grade-scores">
-                        <h3>${grade}</h3>
+            const streakHTML = `
+                <div class="streak-info">
+                    <p><strong>Highest Streak:</strong> ${highestStreak}</p>
+                    <p><strong>Current Streak:</strong> ${currentStreak}</p>
+                </div>
+            `;
+
+            let tableHTML = '';
+            if (gradeStats) {
+                const words = Object.values(gradeStats).filter(word => word.seenInInitialCycle);
+                if (words.length > 0) {
+                    words.sort((a, b) => b.totalIncorrect - a.totalIncorrect);
+                    
+                    const tableRows = words.map(wordData => `<tr><td>${wordData.word}</td><td>${wordData.totalCorrect || 0}</td><td>${wordData.totalIncorrect}</td></tr>`).join('');
+                    
+                    tableHTML = `
                         <table>
                             <thead>
                                 <tr>
@@ -213,15 +221,25 @@ const game = {
                                 ${tableRows}
                             </tbody>
                         </table>
+                    `;
+                }
+            }
+            
+            if (highestStreak > 0 || tableHTML) {
+                htmlContent += `
+                    <div class="grade-scores">
+                        <h3>${grade}</h3>
+                        ${streakHTML}
+                        ${tableHTML || '<p>No words played in this grade yet.</p>'}
                     </div>
                 `;
             }
         });
 
         if (htmlContent) {
-            this.scoreDetails.innerHTML = streakHTML + htmlContent;
+            this.scoreDetails.innerHTML = htmlContent;
         } else {
-            this.scoreDetails.innerHTML = streakHTML + '<p>Play some rounds to see your word stats!</p>';
+            this.scoreDetails.innerHTML = '<p>Play some rounds to see your scores and streaks!</p>';
         }
     },
 
@@ -625,8 +643,20 @@ const game = {
         
         // Update streak
         if (this.wrongAttempts === 0) {
-            this.currentStreak++;
-            this.highestStreak = Math.max(this.highestStreak, this.currentStreak);
+            const gradeForStreak = this.crossGradeLevel || this.difficulty;
+            
+            if (!this.currentStreaks[gradeForStreak]) {
+                this.currentStreaks[gradeForStreak] = 0;
+            }
+            if (!this.highestStreaks[gradeForStreak]) {
+                this.highestStreaks[gradeForStreak] = { highest: 0 };
+            }
+
+            this.currentStreaks[gradeForStreak]++;
+            this.highestStreaks[gradeForStreak].highest = Math.max(
+                this.highestStreaks[gradeForStreak].highest,
+                this.currentStreaks[gradeForStreak]
+            );
             this.saveStreak();
         }
 
@@ -672,7 +702,8 @@ const game = {
         playSound('./incorrect.mp3');
         this.setMessage('Try again!', 'incorrect');
         this.wrongAttempts++;
-        this.currentStreak = 0; // Reset streak
+        const gradeForStreak = this.crossGradeLevel || this.difficulty;
+        this.currentStreaks[gradeForStreak] = 0; // Reset streak for this grade
         
         this.spellingDisplay.animate([
             { transform: 'translateX(0)' }, { transform: 'translateX(-10px)' },
@@ -767,24 +798,30 @@ const game = {
     },
     
     loadStreak() {
-        const savedStreak = localStorage.getItem(this.streakKey);
-        if (savedStreak) {
+        const savedData = localStorage.getItem(this.streakKey);
+        if (savedData) {
             try {
-                const streakData = JSON.parse(savedStreak);
-                this.highestStreak = streakData.highest || 0;
+                const parsedData = JSON.parse(savedData);
+                // Check for old format: { highest: number } and reset if found
+                if (parsedData && typeof parsedData.highest === 'number') {
+                    this.highestStreaks = {};
+                    localStorage.removeItem(this.streakKey);
+                } else {
+                    this.highestStreaks = parsedData || {};
+                }
             } catch (e) {
-                console.error("Error loading streak:", e);
-                this.highestStreak = 0;
+                console.error("Error loading streaks:", e);
+                this.highestStreaks = {};
             }
         }
-        this.currentStreak = 0; // Always start current streak at 0
+        this.currentStreaks = {}; // Always start current streaks at 0 for a new session
     },
 
     saveStreak() {
         try {
-            localStorage.setItem(this.streakKey, JSON.stringify({ highest: this.highestStreak }));
+            localStorage.setItem(this.streakKey, JSON.stringify(this.highestStreaks));
         } catch (e) {
-            console.error("Error saving streak:", e);
+            console.error("Error saving streaks:", e);
         }
     },
     
