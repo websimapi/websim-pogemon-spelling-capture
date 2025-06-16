@@ -31,8 +31,9 @@ header {
     padding: 10px 0;
     min-height: 80px;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
+    gap: 10px;
 }
 
 header h1 {
@@ -63,6 +64,7 @@ header p {
     height: 80px;
     background: url('./back-to-menu-monster.png') no-repeat center center;
     background-size: contain;
+    margin-right: auto;
     border: none;
     cursor: pointer;
     transition: transform 0.2s ease;
@@ -670,6 +672,23 @@ header p {
     font-family: 'Press Start 2P', cursive;
 }
 
+.streak-info {
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #e9eef2;
+    border-radius: 8px;
+    border: 2px solid var(--primary-color);
+    text-align: center;
+}
+.streak-info p {
+    margin: 8px 0;
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+.streak-info strong {
+    color: var(--primary-color);
+}
+
 #score-details .grade-scores {
     margin-bottom: 30px;
     text-align: left;
@@ -691,6 +710,7 @@ header p {
 #score-details th, #score-details td {
     padding: 8px 12px;
     border: 1px solid #ddd;
+    text-align: center;
 }
 
 #score-details th {
@@ -701,6 +721,7 @@ header p {
 #score-details td:first-child {
     font-weight: bold;
     text-transform: capitalize;
+    text-align: left;
 }
 
 #score-details td:last-child {

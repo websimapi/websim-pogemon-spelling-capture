@@ -64,16 +64,20 @@ const game = {
     pogemonCollectionKey: 'pogemon-collection',
     wordStats: {},
     wordStatsKey: 'pogemon-word-stats',
+    streakKey: 'pogemon-streak',
     wordsForCurrentCycle: [],
     firstGradeWords: [], // To store words from the grade below
     speechRecognition: null,
     isChecking: false,
+    currentStreak: 0,
+    highestStreak: 0,
 
     init() {
         this.addEventListeners();
         this.setupSpeechRecognition();
         this.loadCollectionFromStorage();
         this.loadWordStats();
+        this.loadStreak();
     },
 
     addEventListeners() {
@@ -125,6 +129,9 @@ const game = {
         
         // Reset message
         this.setMessage('');
+        
+        // Reset current streak
+        this.currentStreak = 0;
     },
 
     showGallery() {
@@ -171,6 +178,14 @@ const game = {
     renderScores() {
         this.scoreDetails.innerHTML = '';
         const gradeLevels = Object.keys(this.wordStats);
+
+        const streakHTML = `
+            <div class="streak-info">
+                <p><strong>Highest Streak:</strong> ${this.highestStreak}</p>
+                <p><strong>Current Streak:</strong> ${this.currentStreak}</p>
+            </div>
+        `;
+
         let htmlContent = '';
 
         gradeLevels.forEach(grade => {
@@ -181,7 +196,7 @@ const game = {
             if (words.length > 0) {
                 words.sort((a, b) => b.totalIncorrect - a.totalIncorrect);
                 
-                const tableRows = words.map(wordData => `<tr><td>${wordData.word}</td><td>${wordData.totalIncorrect}</td></tr>`).join('');
+                const tableRows = words.map(wordData => `<tr><td>${wordData.word}</td><td>${wordData.totalCorrect || 0}</td><td>${wordData.totalIncorrect}</td></tr>`).join('');
                 
                 htmlContent += `
                     <div class="grade-scores">
@@ -190,6 +205,7 @@ const game = {
                             <thead>
                                 <tr>
                                     <th>Word</th>
+                                    <th>Correct</th>
                                     <th>Incorrect Attempts</th>
                                 </tr>
                             </thead>
@@ -203,9 +219,9 @@ const game = {
         });
 
         if (htmlContent) {
-            this.scoreDetails.innerHTML = htmlContent;
+            this.scoreDetails.innerHTML = streakHTML + htmlContent;
         } else {
-            this.scoreDetails.innerHTML = '<p>Play some rounds to see your word stats!</p>';
+            this.scoreDetails.innerHTML = streakHTML + '<p>Play some rounds to see your word stats!</p>';
         }
     },
 
@@ -222,11 +238,19 @@ const game = {
                 wordList.forEach(wordObj => {
                     this.wordStats['1st Grade'][wordObj.word] = {
                         totalIncorrect: 0,
+                        totalCorrect: 0,
                         seenInInitialCycle: false,
                         ...wordObj
                     };
                 });
                 this.saveWordStats();
+            } else {
+                // Backwards compatibility for old save data
+                Object.values(this.wordStats['1st Grade']).forEach(word => {
+                    if (word.totalCorrect === undefined) {
+                        word.totalCorrect = 0;
+                    }
+                });
             }
             
             this.prepareWordCycle();
@@ -255,7 +279,14 @@ const game = {
             if (!this.wordStats['1st Grade']) {
                 this.wordStats['1st Grade'] = {};
                 this.firstGradeWords.forEach(wordObj => {
-                    this.wordStats['1st Grade'][wordObj.word] = { totalIncorrect: 0, seenInInitialCycle: false, ...wordObj };
+                    this.wordStats['1st Grade'][wordObj.word] = { totalIncorrect: 0, totalCorrect: 0, seenInInitialCycle: false, ...wordObj };
+                });
+            } else {
+                 // Backwards compatibility for old save data
+                Object.values(this.wordStats['1st Grade']).forEach(word => {
+                    if (word.totalCorrect === undefined) {
+                        word.totalCorrect = 0;
+                    }
                 });
             }
 
@@ -263,9 +294,16 @@ const game = {
             if (!this.wordStats['2nd Grade']) {
                 this.wordStats['2nd Grade'] = {};
                 wordList.forEach(wordObj => {
-                    this.wordStats['2nd Grade'][wordObj.word] = { totalIncorrect: 0, seenInInitialCycle: false, ...wordObj };
+                    this.wordStats['2nd Grade'][wordObj.word] = { totalIncorrect: 0, totalCorrect: 0, seenInInitialCycle: false, ...wordObj };
                 });
                 this.saveWordStats();
+            } else {
+                // Backwards compatibility for old save data
+                Object.values(this.wordStats['2nd Grade']).forEach(word => {
+                    if (word.totalCorrect === undefined) {
+                        word.totalCorrect = 0;
+                    }
+                });
             }
             
             this.prepareWordCycle();
@@ -585,12 +623,20 @@ const game = {
 
         confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
         
+        // Update streak
+        if (this.wrongAttempts === 0) {
+            this.currentStreak++;
+            this.highestStreak = Math.max(this.highestStreak, this.currentStreak);
+            this.saveStreak();
+        }
+
         // Update stats for 1st/2nd grade level while image generates
         const gradeForStats = this.crossGradeLevel || this.difficulty;
         if ((gradeForStats === '1st Grade' || gradeForStats === '2nd Grade') && this.currentWordObject) {
             const stats = this.wordStats[gradeForStats]?.[this.currentWordObject.word];
             if (stats) {
                 stats.totalIncorrect += this.wrongAttempts;
+                stats.totalCorrect = (stats.totalCorrect || 0) + 1;
                 stats.seenInInitialCycle = true;
                 this.saveWordStats();
             }
@@ -626,6 +672,7 @@ const game = {
         playSound('./incorrect.mp3');
         this.setMessage('Try again!', 'incorrect');
         this.wrongAttempts++;
+        this.currentStreak = 0; // Reset streak
         
         this.spellingDisplay.animate([
             { transform: 'translateX(0)' }, { transform: 'translateX(-10px)' },
@@ -716,6 +763,28 @@ const game = {
             localStorage.setItem(this.pogemonCollectionKey, JSON.stringify(this.collectedPogemon));
         } catch (e) {
             console.error("Error saving collection to local storage:", e);
+        }
+    },
+    
+    loadStreak() {
+        const savedStreak = localStorage.getItem(this.streakKey);
+        if (savedStreak) {
+            try {
+                const streakData = JSON.parse(savedStreak);
+                this.highestStreak = streakData.highest || 0;
+            } catch (e) {
+                console.error("Error loading streak:", e);
+                this.highestStreak = 0;
+            }
+        }
+        this.currentStreak = 0; // Always start current streak at 0
+    },
+
+    saveStreak() {
+        try {
+            localStorage.setItem(this.streakKey, JSON.stringify({ highest: this.highestStreak }));
+        } catch (e) {
+            console.error("Error saving streak:", e);
         }
     },
     
