@@ -743,25 +743,34 @@ header p {
 @media screen and (max-width: 768px) {
     body {
         padding: 2px;
+        min-height: 100vh;
+        display: flex;
+        align-items: stretch;
     }
 
     #game-container {
         max-width: 100%;
         width: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
     header {
-        min-height: 50px;
+        min-height: 40px;
         padding: 2px 0;
+        flex-shrink: 0;
     }
 
     header h1 {
         font-size: 1.2rem;
+        margin: 0;
     }
 
     #back-to-menu-btn, #collection-btn, #score-btn {
-        width: 50px;
-        height: 50px;
+        width: 40px;
+        height: 40px;
     }
 
     .difficulty-buttons {
@@ -776,217 +785,186 @@ header p {
 
     #game-area {
         flex-direction: column;
-        gap: 10px;
+        gap: 5px;
         align-items: center;
-        margin: 10px 0;
+        margin: 5px 0;
+        flex: 1;
+        overflow: hidden;
+        display: flex;
     }
 
     #game-controls-wrapper {
         max-width: 100%;
         width: 100%;
         box-sizing: border-box;
-        padding: 12px;
+        padding: 8px;
+        flex-shrink: 0;
+        margin: 0;
     }
 
     #spelling-area {
-        margin-bottom: 15px;
+        margin-bottom: 8px;
     }
 
     #word-controls {
         flex-direction: row;
-        gap: 5px;
-        margin-bottom: 10px;
+        gap: 3px;
+        margin-bottom: 6px;
         flex-wrap: wrap;
     }
 
     #word-controls button, .compact-controls button {
-        padding: 6px 8px;
-        font-size: 0.7rem;
-        min-height: 36px;
+        padding: 4px 6px;
+        font-size: 0.6rem;
+        min-height: 28px;
         flex: 1 1 auto;
-        min-width: 70px;
-        border-radius: 4px;
+        min-width: 60px;
+        border-radius: 3px;
     }
 
     .compact-controls {
         display: flex;
         flex-direction: row;
-        gap: 5px;
-        margin-bottom: 10px;
+        gap: 3px;
+        margin-bottom: 6px;
         flex-wrap: wrap;
         justify-content: center;
     }
 
     .compact-controls #next-word-btn {
-        font-size: 0.65rem;
-        padding: 6px 10px;
+        font-size: 0.55rem;
+        padding: 4px 8px;
         background-color: var(--correct-color);
         color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: 3px;
     }
 
     .compact-controls #mic-btn {
         background-color: var(--secondary-color);
         color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: 3px;
     }
 
     #spelling-display {
-        gap: 4px;
+        gap: 2px;
         justify-content: center;
         flex-wrap: nowrap;
         overflow-x: auto;
         padding: 0 2px;
-        margin-bottom: 8px;
+        margin-bottom: 4px;
     }
 
     .letter-box, #spelling-display input {
-        width: 30px;
-        height: 30px;
-        font-size: 1.1rem;
+        width: 25px;
+        height: 25px;
+        font-size: 0.9rem;
         flex-shrink: 0;
-        border-radius: 3px;
+        border-radius: 2px;
     }
 
     #hint-display {
-        gap: 4px;
+        gap: 2px;
         flex-wrap: nowrap;
         overflow-x: auto;
         padding: 0 2px;
-        min-height: 35px;
+        min-height: 27px;
     }
 
     #hint-display .letter-box {
-        width: 30px;
-        height: 30px;
-        font-size: 1.1rem;
+        width: 25px;
+        height: 25px;
+        font-size: 0.9rem;
         flex-shrink: 0;
     }
 
     #game-message {
-        font-size: 1rem;
+        font-size: 0.8rem;
         padding: 0 5px;
         text-align: center;
-        min-height: 20px;
-        margin: 5px 0;
+        min-height: 16px;
+        margin: 2px 0;
     }
 
     .card-container {
         width: 100%;
-        max-width: 280px;
+        max-width: 250px;
         height: auto;
+        flex: 1;
+        display: flex;
+        align-items: stretch;
     }
 
     .card {
         height: auto;
-        min-height: 340px;
-        padding: 10px;
-        border: 6px solid var(--primary-color);
+        min-height: 240px;
+        max-height: 280px;
+        padding: 6px;
+        border: 3px solid var(--primary-color);
+        display: flex;
+        flex-direction: column;
     }
 
     .pokemon-name {
-        font-size: 0.9rem;
-        line-height: 1.2;
+        font-size: 0.7rem;
+        line-height: 1.1;
     }
 
     .card-image-container {
-        height: 160px;
-        border: 3px solid var(--secondary-color);
+        height: 100px;
+        border: 2px solid var(--secondary-color);
+        margin-bottom: 4px;
+        flex-shrink: 0;
     }
 
     .card-description {
-        font-size: 0.8rem;
-        line-height: 1.2;
-        padding: 8px;
+        font-size: 0.65rem;
+        line-height: 1.1;
+        padding: 4px;
+        flex: 1;
+        overflow-y: auto;
     }
 
     .stats-container {
-        padding: 4px 8px;
-        margin-bottom: 5px;
+        padding: 2px 4px;
+        margin-bottom: 2px;
+        flex-shrink: 0;
     }
 
     .pokemon-stats {
-        font-size: 0.8rem;
-    }
-
-    #next-word-btn {
-        font-size: 0.7rem;
-        padding: 8px 15px;
-        margin-top: 8px;
-    }
-
-    #gallery-grid {
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-        gap: 10px;
-    }
-
-    .gallery-item .gallery-card-name {
-        font-size: 0.55rem;
-        padding: 6px;
-    }
-
-    .gallery-item .tooltip {
-        width: 120px;
-        margin-left: -60px;
-        font-size: 0.7rem;
-    }
-
-    .gallery-item .tooltip strong {
         font-size: 0.65rem;
     }
 
-    #score-details table {
-        font-size: 0.8rem;
-    }
-
-    #score-details th, #score-details td {
-        padding: 4px 6px;
-    }
-
-    .streak-info {
-        padding: 8px;
-        margin-bottom: 15px;
-    }
-
-    .streak-info p {
-        font-size: 0.9rem;
-        margin: 4px 0;
-    }
-
-    #pogemon-gallery, #score-view {
-        padding: 15px;
-    }
-
-    #pogemon-gallery h2, #score-view h2 {
-        font-size: 1rem;
-        margin-bottom: 15px;
-    }
-
-    #score-details h3 {
-        font-size: 0.9rem;
-        margin-bottom: 10px;
-        padding-bottom: 5px;
+    #next-word-btn {
+        font-size: 0.6rem;
+        padding: 4px 8px;
+        margin-top: 4px;
     }
 }
 
 @media screen and (max-width: 480px) {
     body {
         padding: 1px;
+        height: 100vh;
+    }
+
+    #game-container {
+        height: 100vh;
+        max-height: 100vh;
     }
 
     header {
-        min-height: 45px;
+        min-height: 35px;
     }
 
     header h1 {
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
 
     #back-to-menu-btn, #collection-btn, #score-btn {
-        width: 45px;
-        height: 45px;
+        width: 35px;
+        height: 35px;
     }
 
     #difficulty-selection button.image-button {
@@ -995,167 +973,126 @@ header p {
     }
 
     .compact-controls button, #word-controls button {
-        font-size: 0.65rem;
-        padding: 5px 6px;
-        min-height: 32px;
-        min-width: 65px;
+        font-size: 0.55rem;
+        padding: 3px 4px;
+        min-height: 24px;
+        min-width: 55px;
     }
 
     .compact-controls #next-word-btn {
-        font-size: 0.6rem;
-        padding: 5px 8px;
-    }
-
-    #game-controls-wrapper {
-        padding: 8px;
-    }
-
-    .letter-box, #spelling-display input {
-        width: 28px;
-        height: 28px;
-        font-size: 1rem;
-    }
-
-    #hint-display .letter-box {
-        width: 28px;
-        height: 28px;
-        font-size: 1rem;
-    }
-
-    #spelling-display, #hint-display {
-        gap: 3px;
-    }
-
-    .card-container {
-        max-width: 260px;
-    }
-
-    .card {
-        min-height: 320px;
-        padding: 8px;
-        border: 4px solid var(--primary-color);
-    }
-
-    .card-image-container {
-        height: 140px;
-        border: 2px solid var(--secondary-color);
-    }
-
-    .pokemon-name {
-        font-size: 0.8rem;
-    }
-
-    .card-description {
-        font-size: 0.75rem;
-        padding: 6px;
-    }
-
-    .stats-container {
+        font-size: 0.5rem;
         padding: 3px 6px;
     }
 
+    #game-controls-wrapper {
+        padding: 4px;
+    }
+
+    .letter-box, #spelling-display input {
+        width: 22px;
+        height: 22px;
+        font-size: 0.8rem;
+    }
+
+    #hint-display .letter-box {
+        width: 22px;
+        height: 22px;
+        font-size: 0.8rem;
+    }
+
+    #spelling-display, #hint-display {
+        gap: 1px;
+    }
+
+    .card-container {
+        max-width: 220px;
+    }
+
+    .card {
+        min-height: 200px;
+        max-height: 220px;
+        padding: 4px;
+        border: 2px solid var(--primary-color);
+    }
+
+    .card-image-container {
+        height: 80px;
+        border: 1px solid var(--secondary-color);
+    }
+
+    .pokemon-name {
+        font-size: 0.65rem;
+    }
+
+    .card-description {
+        font-size: 0.6rem;
+        padding: 3px;
+    }
+
+    .stats-container {
+        padding: 1px 3px;
+    }
+
     .pokemon-stats {
-        font-size: 0.75rem;
+        font-size: 0.6rem;
     }
 
     #game-message {
-        font-size: 0.9rem;
-        margin: 3px 0;
-        min-height: 18px;
-    }
-
-    #gallery-grid {
-        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-        gap: 8px;
-    }
-
-    .gallery-item .gallery-card-name {
-        font-size: 0.5rem;
-        padding: 5px;
-    }
-
-    #score-details table {
-        font-size: 0.7rem;
-    }
-
-    #score-details th, #score-details td {
-        padding: 3px 4px;
-    }
-
-    .streak-info {
-        padding: 6px;
-        margin-bottom: 12px;
-    }
-
-    .streak-info p {
-        font-size: 0.8rem;
-        margin: 3px 0;
-    }
-
-    #pogemon-gallery, #score-view {
-        padding: 10px;
-    }
-
-    #pogemon-gallery h2, #score-view h2 {
-        font-size: 0.9rem;
-        margin-bottom: 10px;
-    }
-
-    #score-details h3 {
-        font-size: 0.8rem;
-        margin-bottom: 8px;
-        padding-bottom: 4px;
+        font-size: 0.75rem;
+        margin: 1px 0;
+        min-height: 14px;
     }
 }
 
 @media screen and (max-width: 360px) {
     .letter-box, #spelling-display input {
-        width: 26px;
-        height: 26px;
-        font-size: 0.9rem;
+        width: 20px;
+        height: 20px;
+        font-size: 0.75rem;
     }
 
     #hint-display .letter-box {
-        width: 26px;
-        height: 26px;
-        font-size: 0.9rem;
+        width: 20px;
+        height: 20px;
+        font-size: 0.75rem;
     }
 
     #spelling-display, #hint-display {
-        gap: 2px;
+        gap: 1px;
     }
 
     #game-controls-wrapper {
-        padding: 6px;
+        padding: 3px;
     }
 
     .card-container {
-        max-width: 240px;
+        max-width: 200px;
     }
 
     .card {
-        min-height: 300px;
-        padding: 6px;
+        min-height: 180px;
+        max-height: 200px;
+        padding: 3px;
     }
 
     .card-image-container {
-        height: 120px;
+        height: 70px;
     }
 
     .compact-controls button {
-        font-size: 0.6rem;
-        padding: 4px 5px;
-        min-height: 30px;
-        min-width: 60px;
+        font-size: 0.5rem;
+        padding: 2px 3px;
+        min-height: 22px;
+        min-width: 50px;
     }
 
     .compact-controls #next-word-btn {
-        font-size: 0.55rem;
-        padding: 4px 6px;
+        font-size: 0.45rem;
+        padding: 2px 4px;
     }
 
     #game-message {
-        font-size: 0.85rem;
+        font-size: 0.7rem;
     }
 }
 
