@@ -195,6 +195,11 @@ header p {
     align-self: stretch;
 }
 
+#spelling-area {
+    margin-bottom: 25px;
+    order: -1; /* Ensure it appears first */
+}
+
 #word-controls {
     display: flex;
     justify-content: center;
@@ -224,18 +229,6 @@ header p {
 #word-controls button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-}
-
-#spelling-area {
-    margin-bottom: 20px;
-}
-
-.spelling-input-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
 }
 
 #spelling-display {
