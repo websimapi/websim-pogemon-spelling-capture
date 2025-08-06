@@ -189,14 +189,14 @@ header p {
 
 #game-controls-wrapper {
     background-color: var(--card-bg);
-    padding: 15px;
+    padding: 4px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     width: 100%;
     max-width: 900px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 2px;
     height: fit-content;
 }
 
@@ -214,7 +214,7 @@ header p {
 #all-controls {
     display: flex;
     justify-content: center;
-    gap: 8px;
+    gap: 2px;
     flex-wrap: wrap;
 }
 
@@ -222,13 +222,13 @@ header p {
     background: none;
     border: 2px solid var(--primary-color);
     color: var(--primary-color);
-    padding: 8px 12px;
+    padding: 4px 8px;
     border-radius: 5px;
     cursor: pointer;
     font-size: 0.9rem;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 3px;
     transition: all 0.3s;
     white-space: nowrap;
 }
@@ -293,7 +293,7 @@ header p {
     justify-content: center;
     gap: 10px;
     min-height: 55px;
-    margin-top: 10px;
+    margin-top: 2px;
     flex-wrap: nowrap;
     overflow-x: auto;
 }
@@ -332,12 +332,12 @@ header p {
     background-color: var(--secondary-color);
     color: white;
     border-color: var(--secondary-color);
-    padding: 10px 15px;
+    padding: 6px 10px;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 3px;
     transition: background-color 0.3s;
-    height: 54px;
+    height: 42px;
 }
 
 #mic-btn:hover {
@@ -361,7 +361,7 @@ header p {
     min-height: 20px;
     font-size: 1.1rem;
     font-weight: bold;
-    margin: 5px 0;
+    margin: 1px 0;
 }
 #game-message.correct { color: var(--correct-color); }
 #game-message.incorrect { color: var(--wrong-color); }
@@ -373,13 +373,13 @@ header p {
 
 #pogemon-reveal-container {
     align-self: center;
-    margin-top: 5px;
+    margin-top: 2px;
 }
 
 /* Card Styling */
 .card-container {
-    width: 220px;
-    height: 280px;
+    width: 280px;
+    height: 340px;
     margin: 0 auto;
 }
 
@@ -416,7 +416,7 @@ header p {
 }
 
 .card-back-content {
-    font-size: 10rem;
+    font-size: 6rem;
     color: white;
     text-shadow: 0 0 10px rgba(0,0,0,0.3);
     animation: pulse-question 2s infinite ease-in-out;
@@ -802,22 +802,22 @@ header p {
         max-width: 100%;
         width: 100%;
         box-sizing: border-box;
-        padding: 8px;
-        gap: 8px;
+        padding: 2px;
+        gap: 2px;
         height: fit-content;
         max-height: calc(100vh - 80px);
         overflow: hidden;
     }
 
     #all-controls {
-        gap: 6px;
+        gap: 2px;
         justify-content: space-around;
     }
 
     #all-controls button {
-        padding: 10px 8px;
+        padding: 6px 4px;
         font-size: 0.8rem;
-        gap: 3px;
+        gap: 2px;
         flex: 1;
         min-width: 0;
     }
@@ -881,36 +881,24 @@ header p {
         padding: 0 10px;
         text-align: center;
         min-height: 18px;
-        margin: 3px 0;
+        margin: 1px 0;
     }
 
     .card-container {
         width: 100%;
-        max-width: 200px;
-        height: 240px;
+        max-width: 260px;
+        height: 320px;
     }
 
     .card {
         height: auto;
-        min-height: 240px;
+        min-height: 320px;
         padding: 6px;
         border-width: 3px;
     }
 
-    .pokemon-name {
-        font-size: 0.8rem;
-        line-height: 1.2;
-    }
-
-    .card-image-container {
-        height: 120px;
-        border-width: 2px;
-    }
-
-    .card-description {
-        font-size: 0.7rem;
-        line-height: 1.1;
-        padding: 4px;
+    .card-back-content {
+        font-size: 3.5rem;
     }
 }
 
@@ -936,7 +924,7 @@ header p {
     }
 
     #all-controls button {
-        padding: 8px 6px;
+        padding: 4px 3px;
         font-size: 0.75rem;
     }
 
@@ -955,31 +943,22 @@ header p {
     }
 
     #game-controls-wrapper {
-        padding: 6px;
-        gap: 6px;
+        padding: 2px;
+        gap: 1px;
     }
 
     .card-container {
-        max-width: 180px;
-        height: 220px;
+        max-width: 240px;
+        height: 300px;
     }
 
     .card {
-        min-height: 220px;
+        min-height: 300px;
         padding: 4px;
     }
 
-    .card-image-container {
-        height: 100px;
-    }
-
-    .pokemon-name {
-        font-size: 0.75rem;
-    }
-
-    .card-description {
-        font-size: 0.65rem;
-        padding: 3px;
+    .card-back-content {
+        font-size: 3rem;
     }
 }
 
@@ -1009,16 +988,16 @@ header p {
     }
 
     .card-container {
-        max-width: 160px;
-        height: 200px;
+        max-width: 200px;
+        height: 260px;
     }
 
     .card {
-        min-height: 200px;
+        min-height: 260px;
     }
 
-    .card-image-container {
-        height: 85px;
+    .card-back-content {
+        font-size: 3rem;
     }
 }
 
