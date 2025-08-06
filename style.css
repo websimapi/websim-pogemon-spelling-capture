@@ -188,12 +188,11 @@ header p {
 #game-controls-wrapper {
     background-color: var(--card-bg);
     padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     flex: 1 1 340px;
     max-width: 500px;
     align-self: stretch;
-    border: 2px solid var(--primary-color);
 }
 
 #spelling-area {
@@ -209,25 +208,23 @@ header p {
 }
 
 #word-controls button {
-    background: linear-gradient(135deg, var(--primary-color), #357abd);
-    border: none;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 25px;
+    background: none;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 8px 12px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    transition: all 0.3s ease;
-    min-height: 44px;
-    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
-    font-weight: 500;
+    transition: all 0.3s;
+    min-height: 40px;
 }
 
 #word-controls button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+    background-color: var(--primary-color);
+    color: white;
 }
 
 #word-controls button:disabled {
@@ -321,31 +318,27 @@ header p {
 }
 
 #mic-btn {
-    padding: 10px 15px;
-    background: linear-gradient(135deg, var(--secondary-color), #e59400);
+    padding: 8px 12px;
+    background-color: var(--secondary-color);
     color: white;
     border: none;
-    border-radius: 25px;
+    border-radius: 5px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    min-height: 44px;
-    box-shadow: 0 4px 15px rgba(245, 166, 35, 0.3);
-    font-weight: 500;
+    gap: 4px;
+    transition: background-color 0.3s;
+    font-size: 0.85rem;
+    min-height: 40px;
 }
 
 #mic-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(245, 166, 35, 0.4);
+    background-color: #e59400;
 }
 
 #mic-btn.recording {
-    background: linear-gradient(135deg, var(--wrong-color), #b8001a);
+    background-color: var(--wrong-color);
 }
-
 #mic-btn.recording #mic-icon {
     animation: pulse 1.5s infinite;
 }
@@ -375,8 +368,8 @@ header p {
 
 /* Card Styling */
 .card-container {
-    width: 300px;
-    height: 400px;
+    width: 320px;
+    height: 440px;
     margin: 0;
 }
 
@@ -539,21 +532,19 @@ header p {
 
 #next-word-btn {
     font-family: 'Press Start 2P', cursive;
-    background: linear-gradient(135deg, var(--correct-color), #68b31a);
+    background-color: var(--correct-color);
     color: white;
     border: none;
-    padding: 12px 24px;
+    padding: 10px 20px;
     margin-top: 15px;
     cursor: pointer;
-    border-radius: 25px;
-    font-size: 0.8rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(126, 211, 33, 0.3);
+    border-radius: 5px;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
 }
 
 #next-word-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(126, 211, 33, 0.4);
+    background-color: #68b31a;
 }
 
 #pogemon-gallery {
@@ -751,8 +742,7 @@ header p {
 /* Mobile Compatibility */
 @media screen and (max-width: 768px) {
     body {
-        padding: 5px;
-        background: linear-gradient(135deg, #f0f4f8, #e1e9f0);
+        padding: 2px;
     }
 
     #game-container {
@@ -761,14 +751,12 @@ header p {
     }
 
     header {
-        min-height: 60px;
-        padding: 5px 0;
-        margin-bottom: 10px;
+        min-height: 50px;
+        padding: 2px 0;
     }
 
     header h1 {
         font-size: 1.2rem;
-        margin-bottom: 0;
     }
 
     #back-to-menu-btn, #collection-btn, #score-btn {
@@ -778,7 +766,7 @@ header p {
 
     .difficulty-buttons {
         flex-direction: column;
-        gap: 15px;
+        gap: 10px;
     }
 
     #difficulty-selection button.image-button {
@@ -788,7 +776,7 @@ header p {
 
     #game-area {
         flex-direction: column;
-        gap: 15px;
+        gap: 10px;
         align-items: center;
         margin: 10px 0;
     }
@@ -797,45 +785,52 @@ header p {
         max-width: 100%;
         width: 100%;
         box-sizing: border-box;
-        padding: 15px;
-        margin: 0;
-        order: 1;
+        padding: 12px;
     }
 
-    #pogemon-reveal-container {
-        order: 2;
-        width: 100%;
-        display: flex;
-        justify-content: center;
+    #spelling-area {
+        margin-bottom: 15px;
+    }
+
+    #word-controls {
+        flex-direction: row;
+        gap: 5px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+    }
+
+    #word-controls button, .compact-controls button {
+        padding: 6px 8px;
+        font-size: 0.7rem;
+        min-height: 36px;
+        flex: 1 1 auto;
+        min-width: 70px;
+        border-radius: 4px;
     }
 
     .compact-controls {
         display: flex;
-        gap: 8px;
-        margin-bottom: 15px;
+        flex-direction: row;
+        gap: 5px;
+        margin-bottom: 10px;
         flex-wrap: wrap;
         justify-content: center;
     }
 
-    .compact-controls button {
-        padding: 8px 12px;
-        font-size: 0.75rem;
-        min-height: 40px;
-        flex: 1 1 auto;
-        min-width: 90px;
-        max-width: 120px;
-        border-radius: 20px;
-    }
-
-    .compact-controls button span {
-        font-size: 0.7rem;
-    }
-
     .compact-controls #next-word-btn {
-        font-size: 0.6rem;
-        padding: 8px 15px;
-        flex-basis: 100%;
-        max-width: none;
+        font-size: 0.65rem;
+        padding: 6px 10px;
+        background-color: var(--correct-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
+
+    .compact-controls #mic-btn {
+        background-color: var(--secondary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
     }
 
     #spelling-display {
@@ -843,54 +838,52 @@ header p {
         justify-content: center;
         flex-wrap: nowrap;
         overflow-x: auto;
-        padding: 0 5px;
-        margin-bottom: 15px;
+        padding: 0 2px;
+        margin-bottom: 8px;
     }
 
     .letter-box, #spelling-display input {
-        width: 32px;
-        height: 32px;
-        font-size: 1.2rem;
+        width: 30px;
+        height: 30px;
+        font-size: 1.1rem;
         flex-shrink: 0;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 3px;
     }
 
     #hint-display {
         gap: 4px;
         flex-wrap: nowrap;
         overflow-x: auto;
-        padding: 0 5px;
-        margin-bottom: 10px;
+        padding: 0 2px;
+        min-height: 35px;
     }
 
     #hint-display .letter-box {
-        width: 32px;
-        height: 32px;
-        font-size: 1.2rem;
+        width: 30px;
+        height: 30px;
+        font-size: 1.1rem;
         flex-shrink: 0;
-        border-radius: 8px;
     }
 
     #game-message {
         font-size: 1rem;
-        padding: 0 10px;
+        padding: 0 5px;
         text-align: center;
-        min-height: 25px;
-        margin-bottom: 10px;
+        min-height: 20px;
+        margin: 5px 0;
     }
 
     .card-container {
         width: 100%;
         max-width: 280px;
-        height: 350px;
+        height: auto;
     }
 
     .card {
-        height: 350px;
-        padding: 12px;
-        border-radius: 12px;
-        border-width: 3px;
+        height: auto;
+        min-height: 340px;
+        padding: 10px;
+        border: 6px solid var(--primary-color);
     }
 
     .pokemon-name {
@@ -900,61 +893,91 @@ header p {
 
     .card-image-container {
         height: 160px;
-        border-width: 2px;
-        border-radius: 8px;
+        border: 3px solid var(--secondary-color);
     }
 
     .card-description {
         font-size: 0.8rem;
         line-height: 1.2;
         padding: 8px;
-        border-radius: 8px;
+    }
+
+    .stats-container {
+        padding: 4px 8px;
+        margin-bottom: 5px;
     }
 
     .pokemon-stats {
         font-size: 0.8rem;
     }
 
+    #next-word-btn {
+        font-size: 0.7rem;
+        padding: 8px 15px;
+        margin-top: 8px;
+    }
+
     #gallery-grid {
-        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
     }
 
     .gallery-item .gallery-card-name {
-        font-size: 0.6rem;
+        font-size: 0.55rem;
         padding: 6px;
     }
 
     .gallery-item .tooltip {
-        display: none;
+        width: 120px;
+        margin-left: -60px;
+        font-size: 0.7rem;
+    }
+
+    .gallery-item .tooltip strong {
+        font-size: 0.65rem;
     }
 
     #score-details table {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
 
     #score-details th, #score-details td {
-        padding: 5px 6px;
+        padding: 4px 6px;
     }
 
     .streak-info {
-        padding: 10px;
-        margin-bottom: 20px;
+        padding: 8px;
+        margin-bottom: 15px;
     }
 
     .streak-info p {
         font-size: 0.9rem;
-        margin: 5px 0;
+        margin: 4px 0;
+    }
+
+    #pogemon-gallery, #score-view {
+        padding: 15px;
+    }
+
+    #pogemon-gallery h2, #score-view h2 {
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+
+    #score-details h3 {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        padding-bottom: 5px;
     }
 }
 
 @media screen and (max-width: 480px) {
     body {
-        padding: 2px;
+        padding: 1px;
     }
 
     header {
-        min-height: 50px;
+        min-height: 45px;
     }
 
     header h1 {
@@ -971,69 +994,51 @@ header p {
         height: 120px;
     }
 
-    #game-controls-wrapper {
-        padding: 12px;
-    }
-
-    .compact-controls {
-        gap: 6px;
-        margin-bottom: 12px;
-    }
-
-    .compact-controls button {
-        font-size: 0.7rem;
-        padding: 6px 10px;
-        min-height: 36px;
-        min-width: 80px;
-        max-width: 110px;
-    }
-
-    .compact-controls button span {
+    .compact-controls button, #word-controls button {
         font-size: 0.65rem;
+        padding: 5px 6px;
+        min-height: 32px;
+        min-width: 65px;
     }
 
     .compact-controls #next-word-btn {
-        font-size: 0.55rem;
-        padding: 6px 12px;
+        font-size: 0.6rem;
+        padding: 5px 8px;
+    }
+
+    #game-controls-wrapper {
+        padding: 8px;
     }
 
     .letter-box, #spelling-display input {
         width: 28px;
         height: 28px;
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
 
     #hint-display .letter-box {
         width: 28px;
         height: 28px;
-        font-size: 1.1rem;
+        font-size: 1rem;
     }
 
-    #spelling-display {
+    #spelling-display, #hint-display {
         gap: 3px;
-    }
-
-    #hint-display {
-        gap: 3px;
-    }
-
-    #game-message {
-        font-size: 0.9rem;
-        min-height: 20px;
     }
 
     .card-container {
         max-width: 260px;
-        height: 320px;
     }
 
     .card {
-        height: 320px;
-        padding: 10px;
+        min-height: 320px;
+        padding: 8px;
+        border: 4px solid var(--primary-color);
     }
 
     .card-image-container {
         height: 140px;
+        border: 2px solid var(--secondary-color);
     }
 
     .pokemon-name {
@@ -1045,25 +1050,61 @@ header p {
         padding: 6px;
     }
 
+    .stats-container {
+        padding: 3px 6px;
+    }
+
     .pokemon-stats {
         font-size: 0.75rem;
     }
 
+    #game-message {
+        font-size: 0.9rem;
+        margin: 3px 0;
+        min-height: 18px;
+    }
+
     #gallery-grid {
-        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+        gap: 8px;
     }
 
     .gallery-item .gallery-card-name {
-        font-size: 0.55rem;
+        font-size: 0.5rem;
+        padding: 5px;
     }
 
     #score-details table {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
     }
 
     #score-details th, #score-details td {
-        padding: 4px 5px;
+        padding: 3px 4px;
+    }
+
+    .streak-info {
+        padding: 6px;
+        margin-bottom: 12px;
+    }
+
+    .streak-info p {
+        font-size: 0.8rem;
+        margin: 3px 0;
+    }
+
+    #pogemon-gallery, #score-view {
+        padding: 10px;
+    }
+
+    #pogemon-gallery h2, #score-view h2 {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+    }
+
+    #score-details h3 {
+        font-size: 0.8rem;
+        margin-bottom: 8px;
+        padding-bottom: 4px;
     }
 }
 
@@ -1071,35 +1112,30 @@ header p {
     .letter-box, #spelling-display input {
         width: 26px;
         height: 26px;
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
 
     #hint-display .letter-box {
         width: 26px;
         height: 26px;
-        font-size: 1rem;
+        font-size: 0.9rem;
     }
 
-    #spelling-display {
-        gap: 2px;
-    }
-
-    #hint-display {
+    #spelling-display, #hint-display {
         gap: 2px;
     }
 
     #game-controls-wrapper {
-        padding: 10px;
+        padding: 6px;
     }
 
     .card-container {
         max-width: 240px;
-        height: 300px;
     }
 
     .card {
-        height: 300px;
-        padding: 8px;
+        min-height: 300px;
+        padding: 6px;
     }
 
     .card-image-container {
@@ -1107,20 +1143,26 @@ header p {
     }
 
     .compact-controls button {
-        min-width: 70px;
-        max-width: 100px;
-        font-size: 0.65rem;
+        font-size: 0.6rem;
+        padding: 4px 5px;
+        min-height: 30px;
+        min-width: 60px;
     }
 
-    .compact-controls button span {
-        font-size: 0.6rem;
+    .compact-controls #next-word-btn {
+        font-size: 0.55rem;
+        padding: 4px 6px;
+    }
+
+    #game-message {
+        font-size: 0.85rem;
     }
 }
 
 /* Touch-friendly improvements */
 @media (hover: none) and (pointer: coarse) {
-    .compact-controls button, #next-word-btn {
-        min-height: 44px;
+    #word-controls button, #mic-btn, #next-word-btn {
+        min-height: 48px;
     }
 
     .gallery-item .tooltip {
@@ -1129,27 +1171,5 @@ header p {
 
     .gallery-item:active {
         transform: scale(0.95);
-    }
-
-    button:active {
-        transform: scale(0.95);
-    }
-}
-
-/* Improved visual hierarchy */
-@media screen and (max-width: 768px) {
-    #spelling-area {
-        background: rgba(255,255,255,0.8);
-        padding: 15px;
-        border-radius: 12px;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-
-    .compact-controls {
-        background: rgba(255,255,255,0.6);
-        padding: 10px;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 }
