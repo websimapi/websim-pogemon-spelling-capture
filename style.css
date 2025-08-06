@@ -741,3 +741,256 @@ header p {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* Mobile Compatibility */
+@media screen and (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    #game-container {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    header {
+        min-height: 60px;
+        padding: 5px 0;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    #back-to-menu-btn, #collection-btn, #score-btn {
+        width: 60px;
+        height: 60px;
+    }
+
+    .difficulty-buttons {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    #difficulty-selection button.image-button {
+        width: 280px;
+        height: 140px;
+    }
+
+    #game-area {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+
+    #game-controls-wrapper {
+        max-width: 100%;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #word-controls {
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    #word-controls button {
+        padding: 15px 20px;
+        font-size: 1.1rem;
+        min-height: 50px;
+    }
+
+    #spelling-display {
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .letter-box, #spelling-display input {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+    }
+
+    #hint-display {
+        gap: 8px;
+    }
+
+    #hint-display .letter-box {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+    }
+
+    #mic-btn {
+        padding: 15px 20px;
+        font-size: 1.1rem;
+        min-height: 50px;
+        width: 100%;
+        max-width: 250px;
+    }
+
+    #game-message {
+        font-size: 1.1rem;
+        padding: 0 10px;
+        text-align: center;
+        min-height: 30px;
+    }
+
+    .card-container {
+        width: 100%;
+        max-width: 320px;
+        height: auto;
+    }
+
+    .card {
+        height: auto;
+        min-height: 440px;
+    }
+
+    .pokemon-name {
+        font-size: 1rem;
+        line-height: 1.3;
+    }
+
+    .card-image-container {
+        height: 200px;
+    }
+
+    .card-description {
+        font-size: 0.85rem;
+        line-height: 1.3;
+    }
+
+    #next-word-btn {
+        font-size: 1rem;
+        padding: 12px 25px;
+        margin-top: 15px;
+    }
+
+    #gallery-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+    }
+
+    .gallery-item .gallery-card-name {
+        font-size: 0.6rem;
+    }
+
+    .gallery-item .tooltip {
+        width: 150px;
+        margin-left: -75px;
+        font-size: 0.8rem;
+    }
+
+    .gallery-item .tooltip strong {
+        font-size: 0.7rem;
+    }
+
+    #score-details table {
+        font-size: 0.9rem;
+    }
+
+    #score-details th, #score-details td {
+        padding: 6px 8px;
+    }
+
+    .streak-info {
+        padding: 12px;
+    }
+
+    .streak-info p {
+        font-size: 1rem;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    header h1 {
+        font-size: 1.2rem;
+    }
+
+    #back-to-menu-btn, #collection-btn, #score-btn {
+        width: 50px;
+        height: 50px;
+    }
+
+    #difficulty-selection button.image-button {
+        width: 250px;
+        height: 125px;
+    }
+
+    #word-controls button {
+        font-size: 1rem;
+        padding: 12px 15px;
+    }
+
+    .letter-box, #spelling-display input {
+        width: 35px;
+        height: 35px;
+        font-size: 1.3rem;
+    }
+
+    #hint-display .letter-box {
+        width: 35px;
+        height: 35px;
+        font-size: 1.3rem;
+    }
+
+    #spelling-display {
+        gap: 6px;
+    }
+
+    #hint-display {
+        gap: 6px;
+    }
+
+    .card-container {
+        max-width: 280px;
+    }
+
+    .card-image-container {
+        height: 180px;
+    }
+
+    .pokemon-name {
+        font-size: 0.9rem;
+    }
+
+    .card-description {
+        font-size: 0.8rem;
+        padding: 8px;
+    }
+
+    #gallery-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+    }
+
+    .gallery-item .gallery-card-name {
+        font-size: 0.55rem;
+        padding: 8px;
+    }
+
+    #score-details table {
+        font-size: 0.8rem;
+    }
+
+    #score-details th, #score-details td {
+        padding: 4px 6px;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+    #word-controls button, #mic-btn, #next-word-btn {
+        min-height: 48px;
+    }
+
+    .gallery-item .tooltip {
+        display: none;
+    }
+
+    .gallery-item:active {
+        transform: scale(0.95);
+    }
+}
