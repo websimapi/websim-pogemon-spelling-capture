@@ -210,7 +210,7 @@ header p {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 5px;
     margin: 0;
     padding: 0;
 }
@@ -251,7 +251,7 @@ header p {
     display: flex;
     justify-content: center;
     gap: 10px;
-    min-height: 60px;
+    min-height: 40px;
     flex-wrap: nowrap;
     overflow-x: auto;
 }
@@ -296,7 +296,7 @@ header p {
     display: flex;
     justify-content: center;
     gap: 10px;
-    min-height: 55px;
+    min-height: 35px;
     margin: 0;
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -553,10 +553,15 @@ header p {
     font-family: 'Press Start 2P', cursive;
     font-size: 0.8rem;
     padding: 15px 30px;
-    margin-top: 20px;
     cursor: pointer;
     border-radius: 5px;
     transition: background-color 0.3s;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    margin: 0;
 }
 
 #next-word-btn:hover {
@@ -839,6 +844,8 @@ header p {
 
     #next-word-btn {
         font-size: 0.7rem;
+        bottom: 10px;
+        padding: 12px 20px;
     }
 
     #word-controls {
@@ -941,6 +948,8 @@ header p {
 
     #next-word-btn {
         font-size: 0.65rem;
+        bottom: 10px;
+        padding: 10px 15px;
     }
 
     #word-controls button {
