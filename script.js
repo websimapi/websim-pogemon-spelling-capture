@@ -1,95 +1,48 @@
-import confetti from 'canvas-confetti';
+import { playSound, speak, cancelSpeech, audioContext } from './modules/audio.js';
+import { StorageManager } from './modules/storage.js';
+import { SpeechManager } from './modules/speech.js';
+import { WordManager } from './modules/words.js';
+import { UIManager } from './modules/ui.js';
 
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-const soundCache = {};
-
-async function playSound(url) {
-    try {
-        let buffer;
-        if (soundCache[url]) {
-            buffer = soundCache[url];
-        } else {
-            const response = await fetch(url);
-            const arrayBuffer = await response.arrayBuffer();
-            buffer = await audioContext.decodeAudioData(arrayBuffer);
-            soundCache[url] = buffer;
-        }
+class Game {
+    constructor() {
+        this.ui = new UIManager();
+        this.storage = new StorageManager();
+        this.speechManager = new SpeechManager();
+        this.wordManager = new WordManager();
         
-        const source = audioContext.createBufferSource();
-        source.buffer = buffer;
-        source.connect(audioContext.destination);
-        source.start(0);
-    } catch (error) {
-        console.error(`Error playing sound ${url}:`, error);
+        // Game State
+        this.difficulty = '3rd Grade';
+        this.currentWord = '';
+        this.currentDescription = '';
+        this.currentWordObject = null;
+        this.crossGradeLevel = null;
+        this.userSpelling = [];
+        this.wrongAttempts = 0;
+        this.hintsGiven = 0;
+        this.revealedIndices = new Set();
+        this.collectedPogemon = [];
+        this.wordStats = {};
+        this.currentStreaks = {};
+        this.highestStreaks = {};
+        this.isChecking = false;
     }
-}
-
-const game = {
-    // DOM Elements
-    difficultySelection: document.getElementById('difficulty-selection'),
-    gameArea: document.getElementById('game-area'),
-    backToMenuBtn: document.getElementById('back-to-menu-btn'),
-    speakWordBtn: document.getElementById('speak-word-btn'),
-    useInSentenceBtn: document.getElementById('use-in-sentence-btn'),
-    spellingDisplay: document.getElementById('spelling-display'),
-    hintDisplay: document.getElementById('hint-display'),
-    micBtn: document.getElementById('mic-btn'),
-    micStatus: document.getElementById('mic-status'),
-    gameMessage: document.getElementById('game-message'),
-    pogemonRevealContainer: document.getElementById('pogemon-reveal-container'),
-    pogemonCard: document.getElementById('pogemon-card'),
-    pogemonImageContainer: document.getElementById('card-pogemon-image-container'),
-    pogemonName: document.getElementById('card-pogemon-name'),
-    pogemonDescription: document.getElementById('card-pogemon-description'),
-    pogemonStats: document.getElementById('card-pogemon-stats'),
-    nextWordBtn: document.getElementById('next-word-btn'),
-    pogemonGallery: document.getElementById('pogemon-gallery'),
-    galleryGrid: document.getElementById('gallery-grid'),
-    collectionBtn: document.getElementById('collection-btn'),
-    scoreBtn: document.getElementById('score-btn'),
-    scoreView: document.getElementById('score-view'),
-    scoreDetails: document.getElementById('score-details'),
-
-    // Game State
-    difficulty: '3rd Grade',
-    currentWord: '',
-    currentDescription: '',
-    currentWordObject: null, // For 1st/2nd grade word data
-    crossGradeLevel: null, // To track words from lower grades
-    userSpelling: [],
-    wrongAttempts: 0,
-    hintsGiven: 0,
-    revealedIndices: new Set(),
-    collectedPogemon: [],
-    pogemonCollectionKey: 'pogemon-collection',
-    wordStats: {},
-    wordStatsKey: 'pogemon-word-stats',
-    streakKey: 'pogemon-streak',
-    wordsForCurrentCycle: [],
-    firstGradeWords: [], // To store words from the grade below
-    speechRecognition: null,
-    isChecking: false,
-    currentStreaks: {},
-    highestStreaks: {},
 
     init() {
         this.addEventListeners();
-        this.setupSpeechRecognition();
-        this.loadCollectionFromStorage();
-        this.loadWordStats();
-        this.loadStreak();
-    },
+        this.setupSpeechCallbacks();
+        this.loadDataFromStorage();
+        this.ui.updateMicButton(false, this.speechManager.isSupported());
+    }
 
     addEventListeners() {
-        this.difficultySelection.addEventListener('click', async (e) => {
+        this.ui.difficultySelection.addEventListener('click', async (e) => {
             if (e.target.tagName === 'BUTTON') {
                 if (audioContext.state === 'suspended') {
                     audioContext.resume();
                 }
                 this.difficulty = e.target.dataset.level;
-                this.difficultySelection.classList.add('hidden');
-                this.gameArea.classList.remove('hidden');
-                this.backToMenuBtn.classList.remove('hidden');
+                this.ui.showGameArea();
                 
                 if (this.difficulty === '1st Grade') {
                     await this.setupFirstGradeLevel();
@@ -101,267 +54,98 @@ const game = {
             }
         });
 
-        this.backToMenuBtn.addEventListener('click', () => this.goBackToMenu());
-        this.speakWordBtn.addEventListener('click', () => this.speak(this.currentWord));
-        this.useInSentenceBtn.addEventListener('click', () => this.getAndSpeakSentence());
-        this.nextWordBtn.addEventListener('click', () => this.startNewRound());
-        this.micBtn.addEventListener('click', () => this.toggleMic());
-        this.collectionBtn.addEventListener('click', () => this.showGallery());
-        this.scoreBtn.addEventListener('click', () => this.showScores());
-    },
+        this.ui.backToMenuBtn.addEventListener('click', () => this.goBackToMenu());
+        this.ui.speakWordBtn.addEventListener('click', () => speak(this.currentWord));
+        this.ui.useInSentenceBtn.addEventListener('click', () => this.getAndSpeakSentence());
+        this.ui.nextWordBtn.addEventListener('click', () => this.startNewRound());
+        this.ui.micBtn.addEventListener('click', () => this.toggleMic());
+        this.ui.collectionBtn.addEventListener('click', () => this.showGallery());
+        this.ui.scoreBtn.addEventListener('click', () => this.showScores());
+
+        // Spelling input event delegation
+        this.ui.spellingDisplay.addEventListener('input', (e) => this.handleSpellingInput(e));
+        this.ui.spellingDisplay.addEventListener('keydown', (e) => this.handleSpellingKeyDown(e));
+        this.ui.spellingDisplay.addEventListener('paste', (e) => this.handleSpellingPaste(e));
+    }
+
+    setupSpeechCallbacks() {
+        this.speechManager.setCallbacks({
+            onLetter: (letter) => this.ui.addLetterToSpelling(letter),
+            onError: (message) => {
+                this.ui.setMessage(message, 'incorrect');
+                setTimeout(() => this.ui.setMessage(''), 1500);
+            },
+            onStart: () => this.ui.updateMicButton(true, true),
+            onEnd: () => this.ui.updateMicButton(false, true)
+        });
+    }
+
+    loadDataFromStorage() {
+        this.collectedPogemon = this.storage.loadCollection();
+        this.wordStats = this.storage.loadWordStats();
+        this.highestStreaks = this.storage.loadStreak();
+        this.currentStreaks = {};
+        this.ui.updateGallery(this.collectedPogemon);
+    }
 
     goBackToMenu() {
-        this.gameArea.classList.add('hidden');
-        this.pogemonGallery.classList.add('hidden');
-        this.scoreView.classList.add('hidden');
-        this.difficultySelection.classList.remove('hidden');
-        this.backToMenuBtn.classList.add('hidden');
-        this.collectionBtn.classList.remove('hidden');
-        this.scoreBtn.classList.remove('hidden');
-
-        // Stop any ongoing processes
-        if (typeof window.speechSynthesis !== 'undefined') {
-            window.speechSynthesis.cancel();
+        this.ui.showDifficultySelection();
+        cancelSpeech();
+        if (this.ui.micBtn.classList.contains('recording')) {
+            this.speechManager.stopListening();
         }
-        if (this.speechRecognition && this.micBtn.classList.contains('recording')) {
-            this.speechRecognition.stop();
-        }
-        
-        // Reset message
-        this.setMessage('');
-        
-        // Reset current streaks
+        this.ui.setMessage('');
         this.currentStreaks = {};
-    },
+    }
 
     showGallery() {
-        this.difficultySelection.classList.add('hidden');
-        this.gameArea.classList.add('hidden');
-        this.scoreView.classList.add('hidden');
-        this.pogemonGallery.classList.remove('hidden');
-
-        this.backToMenuBtn.classList.remove('hidden');
-        this.collectionBtn.classList.add('hidden');
-        this.scoreBtn.classList.add('hidden');
-
-        // Stop any ongoing game processes
-        if (typeof window.speechSynthesis !== 'undefined') {
-            window.speechSynthesis.cancel();
+        this.ui.showGallery();
+        cancelSpeech();
+        if (this.ui.micBtn.classList.contains('recording')) {
+            this.speechManager.stopListening();
         }
-        if (this.speechRecognition && this.micBtn.classList.contains('recording')) {
-            this.speechRecognition.stop();
-        }
-        this.setMessage('');
-    },
+        this.ui.setMessage('');
+    }
 
     showScores() {
-        this.difficultySelection.classList.add('hidden');
-        this.gameArea.classList.add('hidden');
-        this.pogemonGallery.classList.add('hidden');
-        this.scoreView.classList.remove('hidden');
-
-        this.backToMenuBtn.classList.remove('hidden');
-        this.collectionBtn.classList.add('hidden');
-        this.scoreBtn.classList.add('hidden');
-
-        // Stop any ongoing game processes
-        if (typeof window.speechSynthesis !== 'undefined') {
-            window.speechSynthesis.cancel();
+        this.ui.showScores();
+        cancelSpeech();
+        if (this.ui.micBtn.classList.contains('recording')) {
+            this.speechManager.stopListening();
         }
-        if (this.speechRecognition && this.micBtn.classList.contains('recording')) {
-            this.speechRecognition.stop();
-        }
-        this.renderScores();
-        this.setMessage('');
-    },
-
-    renderScores() {
-        this.scoreDetails.innerHTML = '';
-        
-        const gradeLevels = [...new Set([...Object.keys(this.wordStats), ...Object.keys(this.highestStreaks)])];
-        gradeLevels.sort();
-
-        if (gradeLevels.length === 0) {
-            this.scoreDetails.innerHTML = '<p>Play some rounds to see your scores and streaks!</p>';
-            return;
-        }
-
-        let htmlContent = '';
-
-        gradeLevels.forEach(grade => {
-            const gradeStats = this.wordStats[grade];
-            const highestStreak = this.highestStreaks[grade]?.highest || 0;
-            const currentStreak = this.currentStreaks[grade] || 0;
-
-            const streakHTML = `
-                <div class="streak-info">
-                    <p><strong>Highest Streak:</strong> ${highestStreak}</p>
-                    <p><strong>Current Streak:</strong> ${currentStreak}</p>
-                </div>
-            `;
-
-            let tableHTML = '';
-            if (gradeStats) {
-                const words = Object.values(gradeStats).filter(word => word.seenInInitialCycle);
-                if (words.length > 0) {
-                    words.sort((a, b) => b.totalIncorrect - a.totalIncorrect);
-                    
-                    const tableRows = words.map(wordData => `<tr><td>${wordData.word}</td><td>${wordData.totalCorrect || 0}</td><td>${wordData.totalIncorrect}</td></tr>`).join('');
-                    
-                    tableHTML = `
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Word</th>
-                                    <th>Correct</th>
-                                    <th>Incorrect Attempts</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${tableRows}
-                            </tbody>
-                        </table>
-                    `;
-                }
-            }
-            
-            if (highestStreak > 0 || tableHTML) {
-                htmlContent += `
-                    <div class="grade-scores">
-                        <h3>${grade}</h3>
-                        ${streakHTML}
-                        ${tableHTML || '<p>No words played in this grade yet.</p>'}
-                    </div>
-                `;
-            }
-        });
-
-        if (htmlContent) {
-            this.scoreDetails.innerHTML = htmlContent;
-        } else {
-            this.scoreDetails.innerHTML = '<p>Play some rounds to see your scores and streaks!</p>';
-        }
-    },
+        this.ui.renderScores(this.wordStats, this.currentStreaks, this.highestStreaks);
+        this.ui.setMessage('');
+    }
 
     async setupFirstGradeLevel() {
-        this.setMessage('Loading 1st grade words...', 'loading');
+        this.ui.setMessage('Loading 1st grade words...', 'loading');
         try {
-            const response = await fetch('./1st_grade_words.json');
-            if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-            const wordList = await response.json();
-
-            // Initialize stats if not present for this level
-            if (!this.wordStats['1st Grade']) {
-                this.wordStats['1st Grade'] = {};
-                wordList.forEach(wordObj => {
-                    this.wordStats['1st Grade'][wordObj.word] = {
-                        totalIncorrect: 0,
-                        totalCorrect: 0,
-                        seenInInitialCycle: false,
-                        ...wordObj
-                    };
-                });
-                this.saveWordStats();
-            } else {
-                // Backwards compatibility for old save data
-                Object.values(this.wordStats['1st Grade']).forEach(word => {
-                    if (word.totalCorrect === undefined) {
-                        word.totalCorrect = 0;
-                    }
-                });
-            }
-            
-            this.prepareWordCycle();
-
+            const wordList = await this.wordManager.loadFirstGradeWords();
+            this.wordStats = this.wordManager.initializeWordStats(wordList, '1st Grade', this.wordStats);
+            this.storage.saveWordStats(this.wordStats);
+            this.wordManager.prepareWordCycle(this.wordStats['1st Grade']);
         } catch (error) {
             console.error('Failed to load 1st grade words:', error);
-            this.setMessage('Could not load words. Reverting to default.', 'incorrect');
-            this.difficulty = '3rd Grade'; // Revert to a working mode that uses the LLM
+            this.ui.setMessage('Could not load words. Reverting to default.', 'incorrect');
+            this.difficulty = '3rd Grade';
         }
-    },
+    }
 
     async setupSecondGradeLevel() {
-        this.setMessage('Loading 2nd grade words...', 'loading');
+        this.ui.setMessage('Loading 2nd grade words...', 'loading');
         try {
-            // Load 1st grade words for the 1/8 chance mechanic
-            const firstGradeResponse = await fetch('./1st_grade_words.json');
-            if (!firstGradeResponse.ok) throw new Error('Network response for 1st grade words was not ok');
-            this.firstGradeWords = await firstGradeResponse.json();
-
-            // Load 2nd grade words
-            const secondGradeResponse = await fetch('./2nd_grade_words.json');
-            if (!secondGradeResponse.ok) throw new Error('Network response for 2nd grade words was not ok');
-            const wordList = await secondGradeResponse.json();
-
-            // Initialize stats for 1st grade words if not already done, as they can appear in 2nd grade
-            if (!this.wordStats['1st Grade']) {
-                this.wordStats['1st Grade'] = {};
-                this.firstGradeWords.forEach(wordObj => {
-                    this.wordStats['1st Grade'][wordObj.word] = { totalIncorrect: 0, totalCorrect: 0, seenInInitialCycle: false, ...wordObj };
-                });
-            } else {
-                 // Backwards compatibility for old save data
-                Object.values(this.wordStats['1st Grade']).forEach(word => {
-                    if (word.totalCorrect === undefined) {
-                        word.totalCorrect = 0;
-                    }
-                });
-            }
-
-            // Initialize stats for 2nd grade words
-            if (!this.wordStats['2nd Grade']) {
-                this.wordStats['2nd Grade'] = {};
-                wordList.forEach(wordObj => {
-                    this.wordStats['2nd Grade'][wordObj.word] = { totalIncorrect: 0, totalCorrect: 0, seenInInitialCycle: false, ...wordObj };
-                });
-                this.saveWordStats();
-            } else {
-                // Backwards compatibility for old save data
-                Object.values(this.wordStats['2nd Grade']).forEach(word => {
-                    if (word.totalCorrect === undefined) {
-                        word.totalCorrect = 0;
-                    }
-                });
-            }
+            const { firstGrade, secondGrade } = await this.wordManager.loadSecondGradeWords();
             
-            this.prepareWordCycle();
-
+            this.wordStats = this.wordManager.initializeWordStats(firstGrade, '1st Grade', this.wordStats);
+            this.wordStats = this.wordManager.initializeWordStats(secondGrade, '2nd Grade', this.wordStats);
+            this.storage.saveWordStats(this.wordStats);
+            this.wordManager.prepareWordCycle(this.wordStats['2nd Grade']);
         } catch (error) {
             console.error('Failed to load grade level words:', error);
-            this.setMessage('Could not load words. Reverting to default.', 'incorrect');
-            this.difficulty = '3rd Grade'; // Revert
+            this.ui.setMessage('Could not load words. Reverting to default.', 'incorrect');
+            this.difficulty = '3rd Grade';
         }
-    },
-
-    prepareWordCycle() {
-        const gradeStats = this.wordStats[this.difficulty];
-        if (!gradeStats) return;
-        const allWords = Object.values(gradeStats);
-
-        // Phase 1: Show all words that haven't been seen in the initial cycle
-        const unseenInitialWords = allWords.filter(word => !word.seenInInitialCycle);
-        if (unseenInitialWords.length > 0) {
-            this.wordsForCurrentCycle = this.shuffle(unseenInitialWords);
-            return;
-        }
-
-        // Phase 2: All words seen at least once, now sort by score
-        const sortedWords = [...allWords].sort((a, b) => b.totalIncorrect - a.totalIncorrect);
-        const middleIndex = Math.ceil(sortedWords.length / 2);
-        const lowScorers = sortedWords.slice(0, middleIndex);
-        const highScorers = sortedWords.slice(middleIndex);
-
-        this.wordsForCurrentCycle = [...this.shuffle(lowScorers), ...this.shuffle(highScorers)];
-    },
-
-    shuffle(array) {
-        // Fisher-Yates shuffle
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    },
+    }
 
     async startNewRound() {
         this.resetRoundState();
@@ -373,98 +157,69 @@ const game = {
         } else {
             await this.startLLMRound();
         }
-    },
+    }
 
     startFirstGradeRound() {
-        if (this.wordsForCurrentCycle.length === 0) {
-            this.prepareWordCycle();
+        this.currentWordObject = this.wordManager.getNextWordFromCycle();
+        if (!this.currentWordObject) {
+            this.wordManager.prepareWordCycle(this.wordStats['1st Grade']);
+            this.currentWordObject = this.wordManager.getNextWordFromCycle();
         }
 
-        if (this.wordsForCurrentCycle.length === 0) {
-            this.setMessage('Error: No words available.', 'incorrect');
-            console.error("Could not prepare a new word cycle for 1st grade.");
+        if (!this.currentWordObject) {
+            this.ui.setMessage('Error: No words available.', 'incorrect');
             return;
         }
         
-        this.currentWordObject = this.wordsForCurrentCycle.shift();
         this.currentWord = this.currentWordObject.word.toLowerCase().trim();
         this.currentDescription = this.currentWordObject.description_prompt;
-
-        this.speak(this.currentWord);
-        this.updateSpellingDisplay();
-    },
+        speak(this.currentWord);
+        this.ui.updateSpellingDisplay(this.currentWord.length)?.focus();
+    }
     
     startSecondGradeRound() {
         // 1/8 chance to get a word from the grade below
-        if (Math.random() < 0.125 && this.firstGradeWords.length > 0) {
-            // Pick a random 1st grade word
-            this.currentWordObject = this.firstGradeWords[Math.floor(Math.random() * this.firstGradeWords.length)];
+        if (Math.random() < 0.125) {
+            this.currentWordObject = this.wordManager.getRandomFirstGradeWord();
             this.crossGradeLevel = '1st Grade';
         } else {
-            // Pick a 2nd grade word using the cycle logic
-            if (this.wordsForCurrentCycle.length === 0) {
-                this.prepareWordCycle();
+            this.currentWordObject = this.wordManager.getNextWordFromCycle();
+            if (!this.currentWordObject) {
+                this.wordManager.prepareWordCycle(this.wordStats['2nd Grade']);
+                this.currentWordObject = this.wordManager.getNextWordFromCycle();
             }
-
-            if (this.wordsForCurrentCycle.length === 0) {
-                this.setMessage('Error: No 2nd grade words available.', 'incorrect');
-                console.error("Could not prepare a new word cycle for 2nd grade.");
-                return;
-            }
-            
-            this.currentWordObject = this.wordsForCurrentCycle.shift();
             this.crossGradeLevel = null;
+        }
+
+        if (!this.currentWordObject) {
+            this.ui.setMessage('Error: No 2nd grade words available.', 'incorrect');
+            return;
         }
 
         this.currentWord = this.currentWordObject.word.toLowerCase().trim();
         this.currentDescription = this.currentWordObject.description_prompt;
-
-        this.speak(this.currentWord);
-        this.updateSpellingDisplay();
-    },
+        speak(this.currentWord);
+        this.ui.updateSpellingDisplay(this.currentWord.length)?.focus();
+    }
     
     async startLLMRound() {
-        this.setMessage('Getting a new word...', 'loading');
-
+        this.ui.setMessage('Getting a new word...', 'loading');
         try {
-            const completion = await websim.chat.completions.create({
-                messages: [
-                    {
-                        role: 'system',
-                        content: `You are a game master for a spelling game. You provide age-appropriate words and creative creature descriptions based on those words. The word must be a single word, containing no spaces or hyphens. Respond directly with JSON, following this JSON schema, and no other text: { "word": "string", "description": "string" }`
-                    },
-                    {
-                        role: 'user',
-                        content: `Generate a single, non-hyphenated word for a ${this.difficulty} level speller. The description should be for a fantasy creature, called a "Pogemon", whose characteristics are inspired by the word's meaning or sound.`
-                    }
-                ],
-                json: true,
-            });
-
-            const result = JSON.parse(completion.content);
-            this.currentWord = result.word.toLowerCase().trim().replace(/[^a-z]/gi, '');
-            this.currentDescription = result.description;
-            this.currentWordObject = { word: this.currentWord, description_prompt: this.currentDescription };
+            this.currentWordObject = await this.wordManager.generateLLMWord(this.difficulty);
+            this.currentWord = this.currentWordObject.word;
+            this.currentDescription = this.currentWordObject.description_prompt;
             
-            this.setMessage('');
-            this.speak(this.currentWord);
-            this.updateSpellingDisplay();
+            this.ui.setMessage('');
+            speak(this.currentWord);
+            this.ui.updateSpellingDisplay(this.currentWord.length)?.focus();
         } catch (error) {
             console.error('Error fetching new word:', error);
-            this.setMessage('Could not get a new word. Please try again.', 'incorrect');
+            this.ui.setMessage('Could not get a new word. Please try again.', 'incorrect');
         }
-    },
+    }
     
     resetRoundState() {
-        this.pogemonCard.classList.add('pre-reveal');
-        this.pogemonImageContainer.innerHTML = '<div class="card-back-content">?</div>';
-        this.pogemonName.textContent = '?????';
-        this.pogemonDescription.textContent = 'Spell the word to reveal this Pogemon!';
-        this.pogemonStats.textContent = this.difficulty;
-        this.nextWordBtn.classList.add('hidden');
-        this.setMessage('');
-        
-        this.gameArea.classList.remove('hidden');
+        this.ui.resetRoundUI(this.difficulty);
         this.userSpelling = [];
         this.wrongAttempts = 0;
         this.hintsGiven = 0;
@@ -472,64 +227,54 @@ const game = {
         this.currentWordObject = null;
         this.crossGradeLevel = null;
         this.revealedIndices.clear();
-        this.hintDisplay.innerHTML = '';
-        this.spellingDisplay.innerHTML = '';
-        this.useInSentenceBtn.disabled = false;
-        this.useInSentenceBtn.querySelector('span').textContent = 'Use in Sentence';
-    },
+    }
 
-    speak(text) {
-        if (!text || typeof window.speechSynthesis === 'undefined') {
-            console.warn('Speech synthesis not supported or no text to speak.');
-            return;
-        }
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        window.speechSynthesis.speak(utterance);
-    },
-    
     handleSpellingInput(e) {
         const input = e.target;
+        if (input.tagName !== 'INPUT') return;
+        
         const value = input.value;
 
-        // If user enters a valid letter, move to next box
         if (value.match(/^[a-z]$/i)) {
             const index = parseInt(input.dataset.index, 10);
-            const nextInput = this.spellingDisplay.querySelector(`input[data-index="${index + 1}"]`);
+            const nextInput = this.ui.spellingDisplay.querySelector(`input[data-index="${index + 1}"]`);
             if (nextInput) {
                 nextInput.focus();
             } else {
-                // This was the last box, check spelling
                 this.checkSpelling();
             }
         } else if (value) {
-            input.value = ''; // Clear invalid input
+            input.value = '';
         }
-    },
+    }
 
     handleSpellingKeyDown(e) {
         const input = e.target;
+        if (input.tagName !== 'INPUT') return;
+        
         const index = parseInt(input.dataset.index, 10);
 
         if (e.key === 'Backspace' && input.value === '') {
             e.preventDefault();
-            const prevInput = this.spellingDisplay.querySelector(`input[data-index="${index - 1}"]`);
+            const prevInput = this.ui.spellingDisplay.querySelector(`input[data-index="${index - 1}"]`);
             if (prevInput) {
                 prevInput.focus();
             }
         } else if (e.key === 'ArrowLeft') {
-            const prevInput = this.spellingDisplay.querySelector(`input[data-index="${index - 1}"]`);
+            const prevInput = this.ui.spellingDisplay.querySelector(`input[data-index="${index - 1}"]`);
             if (prevInput) prevInput.focus();
         } else if (e.key === 'ArrowRight') {
-            const nextInput = this.spellingDisplay.querySelector(`input[data-index="${index + 1}"]`);
+            const nextInput = this.ui.spellingDisplay.querySelector(`input[data-index="${index + 1}"]`);
             if (nextInput) nextInput.focus();
         }
-    },
+    }
     
     handleSpellingPaste(e) {
+        if (e.target.tagName !== 'INPUT') return;
+        
         e.preventDefault();
         const pasteData = e.clipboardData.getData('text').toLowerCase().replace(/[^a-z]/g, '');
-        const inputs = this.spellingDisplay.querySelectorAll('input');
+        const inputs = this.ui.spellingDisplay.querySelectorAll('input');
         
         for (let i = 0; i < pasteData.length; i++) {
             if (inputs[i]) {
@@ -537,113 +282,92 @@ const game = {
             }
         }
         this.checkSpelling();
-    },
-    
-    addLetter(letter) {
-        const inputs = this.spellingDisplay.querySelectorAll('input');
-        const targetInput = Array.from(inputs).find(input => !input.value);
-
-        if (targetInput) {
-            targetInput.value = letter;
-            targetInput.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-    },
-
-    updateSpellingDisplay() {
-        this.spellingDisplay.innerHTML = '';
-        const len = this.currentWord.length || 0;
-        if (len === 0) return;
-
-        for (let i = 0; i < len; i++) {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.maxLength = 1;
-            input.dataset.index = i;
-            input.autocomplete = 'off';
-            input.autocapitalize = 'off';
-            input.addEventListener('input', (e) => this.handleSpellingInput(e));
-            input.addEventListener('keydown', (e) => this.handleSpellingKeyDown(e));
-            input.addEventListener('paste', (e) => this.handleSpellingPaste(e));
-            this.spellingDisplay.appendChild(input);
-        }
-        this.spellingDisplay.querySelector('input')?.focus();
-    },
+    }
 
     async getAndSpeakSentence() {
         if (!this.currentWord) return;
 
-        this.useInSentenceBtn.disabled = true;
-        this.useInSentenceBtn.querySelector('span').textContent = 'Thinking...';
+        this.ui.updateSentenceButton(true);
 
         try {
-            const completion = await websim.chat.completions.create({
-                messages: [
-                    {
-                        role: 'system',
-                        content: `You generate simple sentences for a spelling game. Respond directly with JSON, following this JSON schema, and no other text: { "sentence": "string" }`,
-                    },
-                    {
-                        role: 'user',
-                        content: `Create a simple, age-appropriate sentence for a ${this.difficulty} level speller using the word "${this.currentWord}".`,
-                    },
-                ],
-                json: true,
-            });
+            const sentence = await this.wordManager.generateSentence(this.currentWord, this.difficulty);
+            this.ui.pogemonDescription.textContent = this.currentDescription;
+            speak(sentence);
 
-            const result = JSON.parse(completion.content);
-            if (result.sentence) {
-                // Reveal description as a hint
-                this.pogemonDescription.textContent = this.currentDescription;
-
-                const sentence = result.sentence;
-                this.speak(sentence);
-
-                // Obfuscate word for display
-                const regex = new RegExp(`\\b${this.currentWord}\\b`, 'gi');
-                const obfuscatedSentence = sentence.replace(regex, '____');
-                this.setMessage(obfuscatedSentence, 'hint-sentence');
-
-                // Reset button text but keep it disabled for this round
-                this.useInSentenceBtn.querySelector('span').textContent = 'Use in Sentence';
-            } else {
-                this.setMessage('Could not generate a sentence.', 'incorrect');
-                this.useInSentenceBtn.disabled = false; // Re-enable on failure
-            }
+            const regex = new RegExp(`\\b${this.currentWord}\\b`, 'gi');
+            const obfuscatedSentence = sentence.replace(regex, '____');
+            this.ui.setMessage(obfuscatedSentence, 'hint-sentence');
+            this.ui.updateSentenceButton(false);
         } catch (error) {
             console.error('Error fetching sentence:', error);
-            this.setMessage('Could not get a sentence. Please try again.', 'incorrect');
-            this.useInSentenceBtn.disabled = false; // Re-enable on error
+            this.ui.setMessage('Could not get a sentence. Please try again.', 'incorrect');
+            this.ui.useInSentenceBtn.disabled = false;
         }
-    },
+    }
 
     checkSpelling() {
         if(this.isChecking) return;
         this.isChecking = true;
 
-        const inputs = this.spellingDisplay.querySelectorAll('input');
-        const spelledWord = Array.from(inputs).map(input => input.value).join('').toLowerCase();
+        const spelledWord = this.ui.getUserSpelling();
 
         if (spelledWord === this.currentWord) {
             this.handleCorrectSpelling();
         } else {
             this.handleIncorrectSpelling();
         }
-    },
+    }
 
     async handleCorrectSpelling() {
         playSound('./correct.mp3');
-        this.setMessage('Correct!', 'correct');
-        this.spellingDisplay.querySelectorAll('input').forEach(input => input.disabled = true);
-        this.nextWordBtn.classList.add('hidden'); // Ensure button is hidden until reveal
-
-        this.pogemonName.textContent = this.currentWord;
-        this.pogemonDescription.textContent = this.currentDescription;
-        this.pogemonCard.classList.remove('pre-reveal');
-        this.pogemonImageContainer.innerHTML = '<div class="loader"></div>';
-
-        confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+        this.ui.setMessage('Correct!', 'correct');
+        this.ui.disableSpellingInputs();
+        this.ui.nextWordBtn.classList.add('hidden');
+        this.ui.updatePogemonCard(this.currentWord, this.currentDescription, this.difficulty);
+        this.ui.showConfetti();
         
-        // Update streak
+        this.updateStreaks();
+        this.updateWordStats();
+
+        try {
+            const imageUrl = await this.ui.updatePogemonImage(this.currentDescription);
+            const captured = {
+                word: this.currentWord,
+                description: this.currentDescription,
+                imageUrl: imageUrl
+            };
+            this.collectedPogemon.push(captured);
+            this.storage.saveCollection(this.collectedPogemon);
+            this.ui.updateGallery(this.collectedPogemon);
+        } catch (error) {
+            console.error('Image generation failed:', error);
+        } finally {
+            this.ui.nextWordBtn.classList.remove('hidden');
+        }
+    }
+
+    handleIncorrectSpelling() {
+        playSound('./incorrect.mp3');
+        this.ui.setMessage('Try again!', 'incorrect');
+        this.wrongAttempts++;
+        const gradeForStreak = this.crossGradeLevel || this.difficulty;
+        this.currentStreaks[gradeForStreak] = 0;
+        
+        this.ui.animateIncorrectSpelling();
+
+        setTimeout(() => {
+            const firstInput = this.ui.clearSpellingInputs();
+            this.ui.setMessage('');
+            firstInput?.focus();
+            this.isChecking = false;
+        }, 1000);
+
+        if (this.wrongAttempts >= 3) {
+            this.giveHint();
+        }
+    }
+    
+    updateStreaks() {
         if (this.wrongAttempts === 0) {
             const gradeForStreak = this.crossGradeLevel || this.difficulty;
             
@@ -659,10 +383,11 @@ const game = {
                 this.highestStreaks[gradeForStreak].highest,
                 this.currentStreaks[gradeForStreak]
             );
-            this.saveStreak();
+            this.storage.saveStreak(this.highestStreaks);
         }
+    }
 
-        // Update stats
+    updateWordStats() {
         const gradeForStats = this.crossGradeLevel || this.difficulty;
         if (this.currentWordObject) {
             if (!this.wordStats[gradeForStats]) {
@@ -671,7 +396,7 @@ const game = {
             
             let stats = this.wordStats[gradeForStats][this.currentWordObject.word];
             
-            if (!stats) { // First time seeing this word
+            if (!stats) {
                 stats = {
                     totalIncorrect: 0,
                     totalCorrect: 0,
@@ -684,250 +409,28 @@ const game = {
             stats.totalIncorrect += this.wrongAttempts;
             stats.totalCorrect = (stats.totalCorrect || 0) + 1;
             stats.seenInInitialCycle = true;
-            this.saveWordStats();
+            this.storage.saveWordStats(this.wordStats);
         }
-
-        try {
-            const result = await websim.imageGen({
-                prompt: `${this.currentDescription}, cute friendly monster, pokemon style, cartoon character, vibrant colors, isolated on a plain white background, high quality digital illustration`,
-                aspect_ratio: "1:1"
-            });
-            const img = document.createElement('img');
-            img.src = result.url;
-            this.pogemonImageContainer.innerHTML = '';
-            this.pogemonImageContainer.appendChild(img);
-
-            const captured = {
-                word: this.currentWord,
-                description: this.currentDescription,
-                imageUrl: result.url
-            };
-            this.collectedPogemon.push(captured);
-            this.saveCollectionToStorage();
-            this.updateGallery();
-        } catch (error) {
-            console.error('Image generation failed:', error);
-            this.pogemonImageContainer.innerHTML = '<p>Could not generate image.</p>';
-        } finally {
-            this.nextWordBtn.classList.remove('hidden');
-        }
-    },
-
-    handleIncorrectSpelling() {
-        playSound('./incorrect.mp3');
-        this.setMessage('Try again!', 'incorrect');
-        this.wrongAttempts++;
-        const gradeForStreak = this.crossGradeLevel || this.difficulty;
-        this.currentStreaks[gradeForStreak] = 0; // Reset streak for this grade
-        
-        this.spellingDisplay.animate([
-            { transform: 'translateX(0)' }, { transform: 'translateX(-10px)' },
-            { transform: 'translateX(10px)' }, { transform: 'translateX(0)' }
-        ], { duration: 300, iterations: 1 });
-
-        setTimeout(() => {
-            const inputs = this.spellingDisplay.querySelectorAll('input');
-            inputs.forEach(input => input.value = '');
-            this.setMessage('');
-            inputs[0]?.focus();
-            this.isChecking = false;
-        }, 1000);
-
-        if (this.wrongAttempts >= 3) {
-            this.giveHint();
-        }
-    },
+    }
     
     giveHint() {
         this.hintsGiven++;
-        if (this.hintsGiven === 1) { // First hint: show word length
-            this.hintDisplay.innerHTML = `<p style="width:100%; margin-bottom:5px;">Hint: The word has ${this.currentWord.length} letters.</p>`;
-            for (let i = 0; i < this.currentWord.length; i++) {
-                const box = document.createElement('div');
-                box.className = 'letter-box';
-                this.hintDisplay.appendChild(box);
-            }
-        } else { // Subsequent hints: reveal a letter
-            const hintBoxes = this.hintDisplay.querySelectorAll('.letter-box');
-            if (hintBoxes.length === 0) return;
-
-            const unrevealedIndices = [...Array(this.currentWord.length).keys()].filter(i => !this.revealedIndices.has(i));
-            if (unrevealedIndices.length > 1) { // Don't reveal the very last letter
-                const indexToReveal = unrevealedIndices[Math.floor(Math.random() * unrevealedIndices.length)];
-                this.revealedIndices.add(indexToReveal);
-                hintBoxes[indexToReveal].textContent = this.currentWord[indexToReveal];
-            }
+        const revealed = this.ui.updateHint(this.currentWord, this.hintsGiven, this.revealedIndices);
+        if (revealed !== null) {
+            this.revealedIndices.add(revealed);
         }
-    },
-
-    updateGallery() {
-        if (this.collectedPogemon.length === 0) {
-             this.galleryGrid.innerHTML = '<p>Capture your first Pogemon to start your collection!</p>';
-             return;
-        }
-        this.galleryGrid.innerHTML = '';
-        this.collectedPogemon.forEach(p => {
-            const item = document.createElement('div');
-            item.className = 'gallery-item';
-            item.innerHTML = `
-                <div class="gallery-card-image-container">
-                    <img src="${p.imageUrl}" alt="${p.word}">
-                </div>
-                <div class="gallery-card-info">
-                    <h3 class="gallery-card-name">${p.word}</h3>
-                </div>
-                <div class="tooltip">
-                    <strong>${p.word}</strong>
-                    <p>${p.description}</p>
-                </div>
-            `;
-            this.galleryGrid.appendChild(item);
-        });
-    },
-
-    setMessage(text, type = '') {
-        this.gameMessage.textContent = text;
-        this.gameMessage.className = `game-message ${type}`;
-    },
-
-    loadCollectionFromStorage() {
-        const savedCollection = localStorage.getItem(this.pogemonCollectionKey);
-        if (savedCollection) {
-            try {
-                this.collectedPogemon = JSON.parse(savedCollection);
-                this.updateGallery();
-            } catch (e) {
-                console.error("Error loading collection from local storage:", e);
-                localStorage.removeItem(this.pogemonCollectionKey);
-                this.collectedPogemon = [];
-            }
-        }
-    },
-
-    saveCollectionToStorage() {
-        try {
-            localStorage.setItem(this.pogemonCollectionKey, JSON.stringify(this.collectedPogemon));
-        } catch (e) {
-            console.error("Error saving collection to local storage:", e);
-        }
-    },
-    
-    loadStreak() {
-        const savedData = localStorage.getItem(this.streakKey);
-        if (savedData) {
-            try {
-                const parsedData = JSON.parse(savedData);
-                // Check for old format: { highest: number } and reset if found
-                if (parsedData && typeof parsedData.highest === 'number') {
-                    this.highestStreaks = {};
-                    localStorage.removeItem(this.streakKey);
-                } else {
-                    this.highestStreaks = parsedData || {};
-                }
-            } catch (e) {
-                console.error("Error loading streaks:", e);
-                this.highestStreaks = {};
-            }
-        }
-        this.currentStreaks = {}; // Always start current streaks at 0 for a new session
-    },
-
-    saveStreak() {
-        try {
-            localStorage.setItem(this.streakKey, JSON.stringify(this.highestStreaks));
-        } catch (e) {
-            console.error("Error saving streaks:", e);
-        }
-    },
-    
-    loadWordStats() {
-        const savedStats = localStorage.getItem(this.wordStatsKey);
-        if (savedStats) {
-            try {
-                this.wordStats = JSON.parse(savedStats);
-            } catch (e) {
-                console.error("Error loading word stats from local storage:", e);
-                localStorage.removeItem(this.wordStatsKey);
-                this.wordStats = {};
-            }
-        }
-    },
-
-    saveWordStats() {
-        try {
-            localStorage.setItem(this.wordStatsKey, JSON.stringify(this.wordStats));
-        } catch (e) {
-            console.error("Error saving word stats to local storage:", e);
-        }
-    },
-    
-    setupSpeechRecognition() {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            this.micBtn.disabled = true;
-            this.micStatus.textContent = 'Not Supported';
-            return;
-        }
-
-        this.speechRecognition = new SpeechRecognition();
-        this.speechRecognition.continuous = false;
-        this.speechRecognition.lang = 'en-US';
-        this.speechRecognition.interimResults = false;
-
-        this.speechRecognition.onresult = (event) => {
-            const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
-            const lastChar = transcript.slice(-1);
-
-            if (/[a-z]/.test(lastChar)) {
-                 this.addLetter(lastChar);
-            } else {
-                this.setMessage('Please say a single letter.', 'incorrect');
-                setTimeout(() => this.setMessage(''), 1500);
-            }
-        };
-
-        this.speechRecognition.onspeechend = () => this.speechRecognition.stop();
-        
-        this.speechRecognition.onstart = () => {
-            this.micBtn.classList.add('recording');
-            this.micStatus.textContent = 'Listening...';
-        };
-
-        this.speechRecognition.onend = () => {
-            this.micBtn.classList.remove('recording');
-            this.micStatus.textContent = 'Use Mic';
-        };
-
-        this.speechRecognition.onerror = (event) => {
-             console.error('Speech recognition error', event.error);
-             if (event.error !== 'no-speech') {
-                this.setMessage('Mic error. Try typing.', 'incorrect');
-             }
-        };
-    },
-    
-    toggleMic() {
-        if (this.micBtn.classList.contains('recording')) {
-            this.speechRecognition.stop();
-        } else {
-            const firstInput = this.spellingDisplay.querySelector('input');
-            if (firstInput && firstInput.disabled) return;
-            try {
-                this.speechRecognition.start();
-            } catch(e) {
-                console.error("Mic already started", e);
-            }
-        }
-    },
-
-    flipCard() {
-        this.pogemonCard.classList.add('is-flipped');
-        
-        // Show the next word button after flip animation completes
-        setTimeout(() => {
-            this.nextWordBtn.classList.remove('hidden');
-        }, 800);
     }
-};
 
+    toggleMic() {
+        if (this.ui.micBtn.classList.contains('recording')) {
+            this.speechManager.stopListening();
+        } else {
+            const firstInput = this.ui.spellingDisplay.querySelector('input');
+            if (firstInput && firstInput.disabled) return;
+            this.speechManager.startListening();
+        }
+    }
+}
+
+const game = new Game();
 game.init();
