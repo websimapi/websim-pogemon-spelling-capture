@@ -29,6 +29,7 @@ export class UIManager {
         this.scoreBtn = document.getElementById('score-btn');
         this.scoreView = document.getElementById('score-view');
         this.scoreDetails = document.getElementById('score-details');
+        this.allControls = document.getElementById('all-controls');
     }
 
     showDifficultySelection() {
@@ -281,36 +282,9 @@ export class UIManager {
         this.spellingDisplay.innerHTML = '';
         this.useInSentenceBtn.disabled = false;
         this.useInSentenceBtn.querySelector('span').textContent = 'Use in Sentence';
-        this.createCompactControls();
-    }
-
-    createCompactControls() {
-        // Check if compact controls already exist
-        let compactContainer = document.querySelector('.compact-controls');
-        if (!compactContainer) {
-            compactContainer = document.createElement('div');
-            compactContainer.className = 'compact-controls';
-            
-            // Move buttons into compact container
-            compactContainer.appendChild(this.speakWordBtn);
-            compactContainer.appendChild(this.useInSentenceBtn);
-            compactContainer.appendChild(this.micBtn);
-            compactContainer.appendChild(this.nextWordBtn);
-            
-            // Insert after word-controls div
-            const wordControls = document.getElementById('word-controls');
-            wordControls.style.display = 'none';
-            wordControls.parentNode.insertBefore(compactContainer, wordControls.nextSibling);
-            
-            // Also hide the original mic button container if it exists separately
-            const spellingInputContainer = document.querySelector('.spelling-input-container');
-            if (spellingInputContainer) {
-                const originalMicBtn = spellingInputContainer.querySelector('#mic-btn');
-                if (originalMicBtn && originalMicBtn !== this.micBtn) {
-                    originalMicBtn.style.display = 'none';
-                }
-            }
-        }
+        
+        // Ensure the pogemon card is visible in the game area
+        this.pogemonRevealContainer.style.display = 'block';
     }
 
     updateMicButton(isRecording, isSupported) {
@@ -332,9 +306,11 @@ export class UIManager {
     updateSentenceButton(isLoading) {
         if (isLoading) {
             this.useInSentenceBtn.disabled = true;
-            this.useInSentenceBtn.querySelector('span').textContent = 'Thinking...';
+            const span = this.useInSentenceBtn.querySelector('span');
+            if (span) span.textContent = 'Loading...';
         } else {
-            this.useInSentenceBtn.querySelector('span').textContent = 'Use in Sentence';
+            const span = this.useInSentenceBtn.querySelector('span');
+            if (span) span.textContent = 'Sentence';
         }
     }
 }
