@@ -178,7 +178,7 @@ header p {
 }
 
 #game-area {
-    margin: 20px 0;
+    margin: 0;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -189,19 +189,21 @@ header p {
 
 #game-controls-wrapper {
     background-color: var(--card-bg);
-    padding: 4px;
+    padding: 2px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     width: 100%;
     max-width: 900px;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     height: fit-content;
 }
 
 #spelling-area {
     order: -1;
+    margin: 0;
+    padding: 0;
 }
 
 .spelling-input-container {
@@ -209,6 +211,8 @@ header p {
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    margin: 0;
+    padding: 0;
 }
 
 #all-controls {
@@ -293,7 +297,7 @@ header p {
     justify-content: center;
     gap: 10px;
     min-height: 55px;
-    margin-top: 2px;
+    margin: 0;
     flex-wrap: nowrap;
     overflow-x: auto;
 }
@@ -361,7 +365,8 @@ header p {
     min-height: 20px;
     font-size: 1.1rem;
     font-weight: bold;
-    margin: 1px 0;
+    margin: 0;
+    padding: 0;
 }
 #game-message.correct { color: var(--correct-color); }
 #game-message.incorrect { color: var(--wrong-color); }
@@ -373,7 +378,8 @@ header p {
 
 #pogemon-reveal-container {
     align-self: center;
-    margin-top: 2px;
+    margin: 0;
+    padding: 0;
 }
 
 /* Card Styling */
@@ -802,8 +808,8 @@ header p {
         max-width: 100%;
         width: 100%;
         box-sizing: border-box;
-        padding: 2px;
-        gap: 2px;
+        padding: 1px;
+        gap: 1px;
         height: fit-content;
         max-height: calc(100vh - 80px);
         overflow: hidden;
@@ -881,7 +887,7 @@ header p {
         padding: 0 10px;
         text-align: center;
         min-height: 18px;
-        margin: 1px 0;
+        margin: 0;
     }
 
     .card-container {
@@ -943,8 +949,8 @@ header p {
     }
 
     #game-controls-wrapper {
-        padding: 2px;
-        gap: 1px;
+        padding: 1px;
+        gap: 0px;
     }
 
     .card-container {
