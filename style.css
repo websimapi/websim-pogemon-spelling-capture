@@ -243,7 +243,8 @@ header p {
     justify-content: center;
     gap: 10px;
     min-height: 60px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
 }
 
 .letter-box {
@@ -288,7 +289,8 @@ header p {
     gap: 10px;
     min-height: 55px;
     margin-top: 10px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
 }
 
 #hint-display .letter-box {
@@ -745,7 +747,7 @@ header p {
 /* Mobile Compatibility */
 @media screen and (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 5px;
     }
 
     #game-container {
@@ -787,6 +789,7 @@ header p {
         max-width: 100%;
         width: 100%;
         box-sizing: border-box;
+        padding: 15px;
     }
 
     #word-controls {
@@ -802,24 +805,32 @@ header p {
     }
 
     #spelling-display {
-        gap: 8px;
+        gap: 6px;
         justify-content: center;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0 5px;
     }
 
     .letter-box, #spelling-display input {
-        width: 40px;
-        height: 40px;
-        font-size: 1.5rem;
+        width: 35px;
+        height: 35px;
+        font-size: 1.4rem;
+        flex-shrink: 0;
     }
 
     #hint-display {
-        gap: 8px;
+        gap: 6px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding: 0 5px;
     }
 
     #hint-display .letter-box {
-        width: 40px;
-        height: 40px;
-        font-size: 1.5rem;
+        width: 35px;
+        height: 35px;
+        font-size: 1.4rem;
+        flex-shrink: 0;
     }
 
     #mic-btn {
@@ -875,6 +886,7 @@ header p {
 
     .gallery-item .gallery-card-name {
         font-size: 0.6rem;
+        padding: 8px;
     }
 
     .gallery-item .tooltip {
@@ -905,6 +917,10 @@ header p {
 }
 
 @media screen and (max-width: 480px) {
+    body {
+        padding: 2px;
+    }
+
     header h1 {
         font-size: 1.2rem;
     }
@@ -924,24 +940,28 @@ header p {
         padding: 12px 15px;
     }
 
+    #game-controls-wrapper {
+        padding: 10px;
+    }
+
     .letter-box, #spelling-display input {
-        width: 35px;
-        height: 35px;
-        font-size: 1.3rem;
+        width: 30px;
+        height: 30px;
+        font-size: 1.2rem;
     }
 
     #hint-display .letter-box {
-        width: 35px;
-        height: 35px;
-        font-size: 1.3rem;
+        width: 30px;
+        height: 30px;
+        font-size: 1.2rem;
     }
 
     #spelling-display {
-        gap: 6px;
+        gap: 4px;
     }
 
     #hint-display {
-        gap: 6px;
+        gap: 4px;
     }
 
     .card-container {
@@ -977,6 +997,32 @@ header p {
 
     #score-details th, #score-details td {
         padding: 4px 6px;
+    }
+}
+
+@media screen and (max-width: 360px) {
+    .letter-box, #spelling-display input {
+        width: 28px;
+        height: 28px;
+        font-size: 1.1rem;
+    }
+
+    #hint-display .letter-box {
+        width: 28px;
+        height: 28px;
+        font-size: 1.1rem;
+    }
+
+    #spelling-display {
+        gap: 3px;
+    }
+
+    #hint-display {
+        gap: 3px;
+    }
+
+    #game-controls-wrapper {
+        padding: 8px;
     }
 }
 
